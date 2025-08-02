@@ -1,0 +1,2919 @@
+{
+  "0": {
+    "url": "https://github.com/mandiant/SharPersist",
+    "markdown": "# SharPersist Windows persistence toolkit written in C#. **For detailed usage information on each technique, see the Wiki.** Author - Brett Hawkins (@h4wkst3r) ## Release - Public version 1.0.1 of SharPersist can be found in the Releases section ## Installation/Building ### Pre-Compiled - Use the pre-compiled binary in the Releases section ### Building Yourself Take the below steps to setup Visual Studio in order to compile the project yourself. This requires a couple of .NET libraries that can be installed from the NuGet package manager. #### Libraries Used The below 3rd party libraries are used in this project. | Library",
+    "sigma_rule": {
+      "title": "HackTool - SharPersist Execution",
+      "id": "26488ad0-f9fd-4536-876f-52fea846a2e4",
+      "status": "test",
+      "description": "Detects the execution of the hacktool SharPersist - used to deploy various different kinds of persistence mechanisms",
+      "references": [
+        "https://www.mandiant.com/resources/blog/sharpersist-windows-persistence-toolkit",
+        "https://github.com/mandiant/SharPersist"
+      ],
+      "author": "Florian Roth (Nextron Systems)",
+      "date": "2022-09-15",
+      "modified": "2023-02-04",
+      "tags": [
+        "attack.persistence",
+        "attack.t1053"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\SharPersist.exe"
+          },
+          {
+            "Product": "SharPersist"
+          }
+        ],
+        "selection_cli_1": {
+          "CommandLine|contains": [
+            " -t schtask -c ",
+            " -t startupfolder -c "
+          ]
+        },
+        "selection_cli_2": {
+          "CommandLine|contains|all": [
+            " -t reg -c ",
+            " -m add"
+          ]
+        },
+        "selection_cli_3": {
+          "CommandLine|contains|all": [
+            " -t service -c ",
+            " -m add"
+          ]
+        },
+        "selection_cli_4": {
+          "CommandLine|contains|all": [
+            " -t schtask -c ",
+            " -m add"
+          ]
+        },
+        "condition": "1 of selection_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_hktl_sharpersist.yml"
+  },
+  "1": {
+    "url": "https://thewover.github.io/Introducing-Donut/",
+    "markdown": "# Donut - Injecting .NET Assemblies as Shellcode *TLDR: You can now inject .NET Assemblies into Windows processes using this repo: https://github.com/TheWover/donut/* ## Advancing Tradecraft - Context Offensive and red team tradecraft have changed significantly in the past year. As anti-malware systems improve their capability to detect and deter offensive tools, attackers are shifting their focus to technologies that are not observed by AV. Currently, that means operating entirely in memory and avoiding dropping files onto disk. In the Windows world, the .NET Framework provides a convenient mechanism for this. It is, however, severely restricted in that .NET programs cannot",
+    "sigma_rule": {
+      "title": "DotNet CLR DLL Loaded By Scripting Applications",
+      "id": "4508a70e-97ef-4300-b62b-ff27992990ea",
+      "status": "test",
+      "description": "Detects .NET CLR DLLs being loaded by scripting applications such as wscript or cscript. This could be an indication of potential suspicious execution.",
+      "references": [
+        "https://github.com/tyranid/DotNetToJScript",
+        "https://thewover.github.io/Introducing-Donut/",
+        "https://web.archive.org/web/20230329154538/https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html",
+        "https://web.archive.org/web/20221026202428/https://gist.github.com/code-scrap/d7f152ffcdb3e0b02f7f394f5187f008"
+      ],
+      "author": "omkar72, oscd.community",
+      "date": "2020-10-14",
+      "modified": "2023-02-23",
+      "tags": [
+        "attack.execution",
+        "attack.privilege-escalation",
+        "attack.t1055"
+      ],
+      "logsource": {
+        "category": "image_load",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "Image|endswith": [
+            "\\cmstp.exe",
+            "\\cscript.exe",
+            "\\mshta.exe",
+            "\\msxsl.exe",
+            "\\regsvr32.exe",
+            "\\wmic.exe",
+            "\\wscript.exe"
+          ],
+          "ImageLoaded|endswith": [
+            "\\clr.dll",
+            "\\mscoree.dll",
+            "\\mscorlib.dll"
+          ]
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\image_load\\image_load_susp_script_dotnet_clr_dll_load.yml"
+  },
+  "2": {
+    "url": "https://redcanary.com/blog/right-to-left-override/",
+    "markdown": "# “semaG dna nuF” with Right-to-Left Override Unicode Characters Originally published September 13, 2017. Last modified April 30, 2024. --- *Our Security Operations team loves to share insights on TTPs when we see them in the wild. Today we’re focusing on an oldie but a goodie: right-to-left override attacks.* ## First, a Refresher on Right-to-Left (RLO) Overrides. Unicode contains several characters designed to allow right to left (RTL) characters to be inserted inside text that is normally left to right. One of these is the “RIGHT-TO-LEFT OVERRIDE” character, U+202E. For example, we can write a normal (left to right) sentence",
+    "sigma_rule": {
+      "title": "Potential Defense Evasion Via Right-to-Left Override",
+      "id": "ad691d92-15f2-4181-9aa4-723c74f9ddc3",
+      "related": [
+        {
+          "id": "e0552b19-5a83-4222-b141-b36184bb8d79",
+          "type": "derived"
+        },
+        {
+          "id": "584bca0f-3608-4402-80fd-4075ff6072e3",
+          "type": "derived"
+        }
+      ],
+      "status": "test",
+      "description": "Detects the presence of the \"u202+E\" character, which causes a terminal, browser, or operating system to render text in a right-to-left sequence.\nThis is used as an obfuscation and masquerading techniques.\n",
+      "references": [
+        "https://redcanary.com/blog/right-to-left-override/",
+        "https://www.malwarebytes.com/blog/news/2014/01/the-rtlo-method",
+        "https://unicode-explorer.com/c/202E"
+      ],
+      "author": "Micah Babinski, @micahbabinski",
+      "date": "2023-02-15",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1036.002"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "CommandLine|contains": "‮"
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Commandlines that contains scriptures such as arabic or hebrew might make use of this character"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_susp_right_to_left_override.yml"
+  },
+  "3": {
+    "url": "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Squirrel/",
+    "markdown": "# /Squirrel.exe Binary to update the existing installed Nuget/squirrel package. Part of Microsoft Teams installation. ### Paths: - `C:\\Users\\<username>\\AppData\\Local\\Microsoft\\Teams\\current\\Squirrel.exe` ### Resources: - https://www.youtube.com/watch?v=rOP3hnkj7ls - https://twitter.com/reegun21/status/1144182772623269889 - http://www.hexacorn.com/blog/2018/08/16/squirrel-as-a-lolbin/ - https://medium.com/@reegun/nuget-squirrel-uncontrolled-endpoints-leads-to-arbitrary-code-execution-80c9df51cf12 - https://medium.com/@reegun/update-nuget-squirrel-uncontrolled-endpoints-leads-to-arbitrary-code-execution-b55295144b56 ### Detections: - Sigma: proc_creation_win_lolbin_squirrel.yml ## Download The above binary will go to url and look for RELEASES file and download the nuget package. ``` squirrel.exe --download [url to package] ``` **Use case:** Download binary **Privileges required:** User **Operating systems:** Windows 7 and up with Microsoft Teams installed **ATT&CK® technique:** T1218: System Binary Proxy Execution ## AWL bypass The above binary will go to url and look for RELEASES",
+    "sigma_rule": {
+      "title": "Arbitrary File Download Via Squirrel.EXE",
+      "id": "1e75c1cc-c5d4-42aa-ac3d-91b0b68b3b4c",
+      "related": [
+        {
+          "id": "45239e6a-b035-4aaf-b339-8ad379fcb67e",
+          "type": "similar"
+        },
+        {
+          "id": "fa4b21c9-0057-4493-b289-2556416ae4d7",
+          "type": "obsolete"
+        }
+      ],
+      "status": "test",
+      "description": "Detects the usage of the \"Squirrel.exe\" to download arbitrary files. This binary is part of multiple Electron based software installations (Slack, Teams, Discord, etc.)\n",
+      "references": [
+        "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Squirrel/",
+        "http://www.hexacorn.com/blog/2019/03/30/sqirrel-packages-manager-as-a-lolbin-a-k-a-many-electron-apps-are-lolbins-by-default/",
+        "http://www.hexacorn.com/blog/2018/08/16/squirrel-as-a-lolbin/"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems), Karneades / Markus Neis, Jonhnathan Ribeiro, oscd.community",
+      "date": "2022-06-09",
+      "modified": "2023-11-09",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.execution",
+        "attack.t1218"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": {
+          "Image|endswith": [
+            "\\squirrel.exe",
+            "\\update.exe"
+          ]
+        },
+        "selection_download_cli": {
+          "CommandLine|contains": [
+            " --download ",
+            " --update ",
+            " --updateRollback="
+          ]
+        },
+        "selection_download_http_keyword": {
+          "CommandLine|contains": "http"
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Expected FP with some Electron based applications such as (1Clipboard, Beaker Browser, Caret, Discord, GitHub Desktop, etc.)"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_squirrel_download.yml"
+  },
+  "4": {
+    "url": "https://redcanary.com/blog/threat-intelligence/raspberry-robin/",
+    "markdown": "# Raspberry Robin gets the worm early Red Canary is tracking a worm spread by external drives that leverages Windows Installer to reach out to QNAP-associated domains and download a malicious DLL. *Originally published May 5, 2022. Last modified October 2, 2024.* --- Since fall 2021, Red Canary Intelligence has been tracking a cluster of malicious activity we call Raspberry Robin. Raspberry Robin was the seventh most prevalent threat we observed in 2022, as reported in our 2023 Threat Detection Report. Read on for details on what Raspberry Robin is, high-fidelity opportunities to detect known behaviors, and background on how",
+    "sigma_rule": {
+      "title": "Rundll32 Spawned Via Explorer.EXE",
+      "id": "1723e720-616d-4ddc-ab02-f7e3685a4713",
+      "status": "test",
+      "description": "Detects execution of \"rundll32.exe\" with a parent process of Explorer.exe. This has been observed by variants of Raspberry Robin, as first reported by Red Canary.",
+      "references": [
+        "https://redcanary.com/blog/threat-intelligence/raspberry-robin/",
+        "https://thedfirreport.com/2022/09/26/bumblebee-round-two/"
+      ],
+      "author": "CD_ROM_",
+      "date": "2022-05-21",
+      "modified": "2023-08-31",
+      "tags": [
+        "attack.defense-evasion"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_parent": {
+          "ParentImage|endswith": "\\explorer.exe"
+        },
+        "selection_img": [
+          {
+            "Image|endswith": "\\rundll32.exe"
+          },
+          {
+            "OriginalFileName": "RUNDLL32.EXE"
+          }
+        ],
+        "filter_main_generic": [
+          {
+            "CommandLine|contains": " C:\\Windows\\System32\\"
+          },
+          {
+            "CommandLine|endswith": " -localserver 22d8c27b-47a1-48d1-ad08-7da7abd79617"
+          }
+        ],
+        "condition": "all of selection_* and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_rundll32_parent_explorer.yml"
+  },
+  "5": {
+    "url": "https://research.nccgroup.com/2022/08/19/back-in-black-unlocking-a-lockbit-3-0-ransomware-attack/",
+    "markdown": "# Back in Black: Unlocking a LockBit 3.0 Ransomware Attack **19 August 2022** **By RIFT: Research and Intelligence Fusion Team** --- ## Summary ### tl;dr This post explores some of the TTPs employed by a threat actor who were observed deploying LockBit 3.0 ransomware during an incident response engagement. Below provides a summary of findings which are presented in this blog post: - Initial access via SocGholish. - Establishing persistence to run Cobalt Strike beacon. - Disabling of Windows Defender and Sophos. - Use of information gathering tools such as Bloodhound and Seatbelt. - Lateral movement leveraging RDP and Cobalt",
+    "sigma_rule": {
+      "title": "Suspicious Group And Account Reconnaissance Activity Using Net.EXE",
+      "id": "d95de845-b83c-4a9a-8a6a-4fc802ebf6c0",
+      "status": "test",
+      "description": "Detects suspicious reconnaissance command line activity on Windows systems using Net.EXE\nCheck if the user that executed the commands is suspicious (e.g. service accounts, LOCAL_SYSTEM)\n",
+      "references": [
+        "https://redcanary.com/blog/how-one-hospital-thwarted-a-ryuk-ransomware-outbreak/",
+        "https://thedfirreport.com/2020/10/18/ryuk-in-5-hours/",
+        "https://research.nccgroup.com/2022/08/19/back-in-black-unlocking-a-lockbit-3-0-ransomware-attack/"
+      ],
+      "author": "Florian Roth (Nextron Systems), omkar72, @svch0st, Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2019-01-16",
+      "modified": "2023-03-02",
+      "tags": [
+        "attack.discovery",
+        "attack.t1087.001",
+        "attack.t1087.002"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": [
+              "\\net.exe",
+              "\\net1.exe"
+            ]
+          },
+          {
+            "OriginalFileName": [
+              "net.exe",
+              "net1.exe"
+            ]
+          }
+        ],
+        "selection_group_root": {
+          "CommandLine|contains": [
+            " group ",
+            " localgroup "
+          ]
+        },
+        "selection_group_flags": {
+          "CommandLine|contains": [
+            "domain admins",
+            " administrator",
+            " administrateur",
+            "enterprise admins",
+            "Exchange Trusted Subsystem",
+            "Remote Desktop Users",
+            "Utilisateurs du Bureau à distance",
+            "Usuarios de escritorio remoto",
+            " /do"
+          ]
+        },
+        "filter_group_add": {
+          "CommandLine|contains": " /add"
+        },
+        "selection_accounts_root": {
+          "CommandLine|contains": " accounts "
+        },
+        "selection_accounts_flags": {
+          "CommandLine|contains": " /do"
+        },
+        "condition": "selection_img and ((all of selection_group_* and not filter_group_add) or all of selection_accounts_*)"
+      },
+      "falsepositives": [
+        "Inventory tool runs",
+        "Administrative activity"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_net_groups_and_accounts_recon.yml"
+  },
+  "6": {
+    "url": "https://github.com/outflanknl/Dumpert",
+    "markdown": "# Dumpert ## Folders and Files - Dumpert-Aggressor - Dumpert-DLL - Dumpert - README.md ## README **Dumpert, an LSASS memory dumper using direct system calls and API unhooking** Recent malware research shows that there is an increase in malware that is using direct system calls to evade user-mode API hooks used by security products. This tool demonstrates the use of direct System Calls and API unhooking and combines these techniques in a proof of concept code which can be used to create a LSASS memory dump using Cobalt Strike, while not touching disk and evading AV/EDR monitored user-mode API calls.",
+    "sigma_rule": {
+      "title": "HackTool - Dumpert Process Dumper Execution",
+      "id": "2704ab9e-afe2-4854-a3b1-0c0706d03578",
+      "status": "test",
+      "description": "Detects the use of Dumpert process dumper, which dumps the lsass.exe process memory",
+      "references": [
+        "https://github.com/outflanknl/Dumpert",
+        "https://unit42.paloaltonetworks.com/actors-still-exploiting-sharepoint-vulnerability/"
+      ],
+      "author": "Florian Roth (Nextron Systems)",
+      "date": "2020-02-04",
+      "modified": "2025-01-22",
+      "tags": [
+        "attack.credential-access",
+        "attack.t1003.001"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": [
+          {
+            "Hashes|contains": "MD5=09D278F9DE118EF09163C6140255C690"
+          },
+          {
+            "CommandLine|contains": "Dumpert.dll"
+          }
+        ],
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Very unlikely"
+      ],
+      "level": "critical"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_hktl_dumpert.yml"
+  },
+  "7": {
+    "url": "https://news.sophos.com/en-us/2022/01/19/zloader-installs-remote-access-backdoors-and-delivers-cobalt-strike/",
+    "markdown": "",
+    "sigma_rule": {
+      "title": "File Decryption Using Gpg4win",
+      "id": "037dcd71-33a8-4392-bb01-293c94663e5a",
+      "status": "test",
+      "description": "Detects usage of Gpg4win to decrypt files",
+      "references": [
+        "https://blogs.vmware.com/security/2022/11/batloader-the-evasive-downloader-malware.html",
+        "https://www.gpg4win.de/documentation.html",
+        "https://news.sophos.com/en-us/2022/01/19/zloader-installs-remote-access-backdoors-and-delivers-cobalt-strike/"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2023-08-09",
+      "tags": [
+        "attack.execution"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_metadata": [
+          {
+            "Image|endswith": [
+              "\\gpg.exe",
+              "\\gpg2.exe"
+            ]
+          },
+          {
+            "Description": "GnuPG’s OpenPGP tool"
+          }
+        ],
+        "selection_cli": {
+          "CommandLine|contains|all": [
+            " -d ",
+            "passphrase"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_gpg4win_decryption.yml"
+  },
+  "8": {
+    "url": "https://labs.withsecure.com/publications/add-in-opportunities-for-office-persistence",
+    "markdown": "# Add-In Opportunities for Office Persistence 21 April, 2017 ## Introduction One software product that attackers will almost certainly find in the environments that they're targeting is Microsoft Office. Office applications due to this ubiquity present a consistent source of opportunity for persistence mechanisms. This post will explore various opportunities for gaining persistence through native Microsoft Office functionality. It was inspired by Kostas Lintovois’ similar work which identified ways to persist in transient Virtual Desktop Infrastructure (VDI) environments through adding a VBA backdoor to Office template files (“One Template to Rule ‘Em All”). The following opportunities for Office-based persistence will",
+    "sigma_rule": {
+      "title": "Potential Persistence Via Microsoft Office Add-In",
+      "id": "8e1cb247-6cf6-42fa-b440-3f27d57e9936",
+      "status": "test",
+      "description": "Detects potential persistence activity via startup add-ins that load when Microsoft Office starts (.wll/.xll are simply .dll fit for Word or Excel).",
+      "references": [
+        "Internal Research",
+        "https://labs.withsecure.com/publications/add-in-opportunities-for-office-persistence",
+        "https://github.com/redcanaryco/atomic-red-team/blob/4ae9580a1a8772db87a1b6cdb0d03e5af231e966/atomics/T1137.006/T1137.006.md"
+      ],
+      "author": "NVISO",
+      "date": "2020-05-11",
+      "modified": "2023-02-08",
+      "tags": [
+        "attack.persistence",
+        "attack.t1137.006"
+      ],
+      "logsource": {
+        "category": "file_event",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_wlldropped": {
+          "TargetFilename|contains": "\\Microsoft\\Word\\Startup\\",
+          "TargetFilename|endswith": ".wll"
+        },
+        "selection_xlldropped": {
+          "TargetFilename|contains": "\\Microsoft\\Excel\\Startup\\",
+          "TargetFilename|endswith": ".xll"
+        },
+        "selection_xladropped": {
+          "TargetFilename|contains": "Microsoft\\Excel\\XLSTART\\",
+          "TargetFilename|endswith": ".xlam"
+        },
+        "selection_generic": {
+          "TargetFilename|contains": "\\Microsoft\\Addins\\",
+          "TargetFilename|endswith": [
+            ".xlam",
+            ".xla",
+            ".ppam"
+          ]
+        },
+        "condition": "1 of selection_*"
+      },
+      "falsepositives": [
+        "Legitimate add-ins"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\file\\file_event\\file_event_win_office_addin_persistence.yml"
+  },
+  "9": {
+    "url": "https://www.microsoft.com/en-us/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/",
+    "markdown": "# Deep dive into the Solorigate second-stage activation: From SUNBURST to TEARDROP and Raindrop **Published**: January 20, 2021 --- > **UPDATE:** Microsoft continues to work with partners and customers to expand our knowledge of the threat actor behind the nation-state cyberattacks that compromised the supply chain of SolarWinds and impacted multiple other organizations. Microsoft previously used ‘Solorigate’ as the primary designation for the actor, but moving forward, we want to place appropriate focus on the actors behind the sophisticated attacks, rather than one of the examples of malware used by the actors. Microsoft Threat Intelligence Center (MSTIC) has named the",
+    "sigma_rule": {
+      "title": "Audit Policy Tampering Via Auditpol",
+      "id": "0a13e132-651d-11eb-ae93-0242ac130002",
+      "related": [
+        {
+          "id": "c6c56ada-612b-42d1-9a29-adad3c5c2c1e",
+          "type": "similar"
+        }
+      ],
+      "status": "test",
+      "description": "Threat actors can use auditpol binary to change audit policy configuration to impair detection capability.\nThis can be carried out by selectively disabling/removing certain audit policies as well as restoring a custom policy owned by the threat actor.\n",
+      "references": [
+        "https://www.microsoft.com/en-us/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/"
+      ],
+      "author": "Janantha Marasinghe (https://github.com/blueteam0ps)",
+      "date": "2021-02-02",
+      "modified": "2023-02-22",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1562.002"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\auditpol.exe"
+          },
+          {
+            "OriginalFileName": "AUDITPOL.EXE"
+          }
+        ],
+        "selection_cli": {
+          "CommandLine|contains": [
+            "disable",
+            "clear",
+            "remove",
+            "restore"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Administrator or administrator scripts might leverage the flags mentioned in the detection section. Either way, it should always be monitored"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_auditpol_susp_execution.yml"
+  },
+  "10": {
+    "url": "https://www.uptycs.com/blog/lolbins-are-no-laughing-matter",
+    "markdown": "# LOLBins: Understanding the Silent Operations of Attackers **September 01, 2021** **Tags:** Cloud Security, Threats The Uptycs Threat Research team has observed several malicious binaries in our threat intelligence systems using LOLBins in their attack kill chain. LOLBins (short form for Living Off the Land Binaries), are non-malicious native operating system or known software binaries used for performing malicious activities and evading cyber defenses. The Uptycs Threat research team has created over 300 rules covering different techniques used by LOLBins in the MITRE ATT&CK framework. In this post, we’ll take a look at the LOLBins used by the attackers and",
+    "sigma_rule": {
+      "title": "Hiding Files with Attrib.exe",
+      "id": "4281cb20-2994-4580-aa63-c8b86d019934",
+      "status": "test",
+      "description": "Detects usage of attrib.exe to hide files from users.",
+      "references": [
+        "https://unit42.paloaltonetworks.com/unit42-sure-ill-take-new-combojack-malware-alters-clipboards-steal-cryptocurrency/",
+        "https://www.uptycs.com/blog/lolbins-are-no-laughing-matter"
+      ],
+      "author": "Sami Ruohonen",
+      "date": "2019-01-16",
+      "modified": "2023-03-14",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1564.001"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\attrib.exe"
+          },
+          {
+            "OriginalFileName": "ATTRIB.EXE"
+          }
+        ],
+        "selection_cli": {
+          "CommandLine|contains": " +h "
+        },
+        "filter_main_msiexec": {
+          "CommandLine|contains": "\\desktop.ini "
+        },
+        "filter_optional_intel": {
+          "ParentImage|endswith": "\\cmd.exe",
+          "CommandLine": "+R +H +S +A \\\\\\*.cui",
+          "ParentCommandLine": "C:\\\\WINDOWS\\\\system32\\\\\\*.bat"
+        },
+        "condition": "all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*"
+      },
+      "falsepositives": [
+        "IgfxCUIService.exe hiding *.cui files via .bat script (attrib.exe a child of cmd.exe and igfxCUIService.exe is the parent of the cmd.exe)",
+        "Msiexec.exe hiding desktop.ini"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_attrib_hiding_files.yml"
+  },
+  "11": {
+    "url": "https://cloud.google.com/blog/topics/threat-intelligence/apt10-targeting-japanese-corporations-using-updated-ttps/",
+    "markdown": "# APT10 Targeting Japanese Corporations Using Updated TTPs **September 13, 2018** --- ## Introduction In July 2018, FireEye devices detected and blocked what appears to be APT10 (Menupass) activity targeting the Japanese media sector. APT10 is a Chinese cyber espionage group that FireEye has tracked since 2009, and they have a history of targeting Japanese entities. In this campaign, the group sent spear phishing emails containing malicious documents that led to the installation of the UPPERCUT backdoor. This backdoor is well-known in the security community as ANEL, and it used to come in beta or RC (release candidate) until recently.",
+    "sigma_rule": {
+      "title": "Suspicious GUP Usage",
+      "id": "0a4f6091-223b-41f6-8743-f322ec84930b",
+      "status": "test",
+      "description": "Detects execution of the Notepad++ updater in a suspicious directory, which is often used in DLL side-loading attacks",
+      "references": [
+        "https://cloud.google.com/blog/topics/threat-intelligence/apt10-targeting-japanese-corporations-using-updated-ttps/"
+      ],
+      "author": "Florian Roth (Nextron Systems)",
+      "date": "2019-02-06",
+      "modified": "2022-08-13",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1574.002"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "Image|endswith": "\\GUP.exe"
+        },
+        "filter_programfiles": {
+          "Image|endswith": [
+            "\\Program Files\\Notepad++\\updater\\GUP.exe",
+            "\\Program Files (x86)\\Notepad++\\updater\\GUP.exe"
+          ]
+        },
+        "filter_user": {
+          "Image|contains": "\\Users\\",
+          "Image|endswith": [
+            "\\AppData\\Local\\Notepad++\\updater\\GUP.exe",
+            "\\AppData\\Roaming\\Notepad++\\updater\\GUP.exe"
+          ]
+        },
+        "condition": "selection and not 1 of filter_*"
+      },
+      "falsepositives": [
+        "Execution of tools named GUP.exe and located in folders different than Notepad++\\updater"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_gup_suspicious_execution.yml"
+  },
+  "12": {
+    "url": "https://www.microsoft.com/en-us/security/blog/2024/01/17/new-ttps-observed-in-mint-sandstorm-campaign-targeting-high-profile-individuals-at-universities-and-research-orgs/",
+    "markdown": "# New TTPs observed in Mint Sandstorm campaign targeting high-profile individuals at universities and research orgs **Published on January 17, 2024** --- Since November 2023, Microsoft has observed a distinct subset of Mint Sandstorm (PHOSPHORUS) targeting high-profile individuals working on Middle Eastern affairs at universities and research organizations in Belgium, France, Gaza, Israel, the United Kingdom, and the United States. In this campaign, Mint Sandstorm used bespoke phishing lures in an attempt to socially engineer targets into downloading malicious files. In a handful of cases, Microsoft observed new post-intrusion tradecraft including the use of a new, custom backdoor called MediaPl.",
+    "sigma_rule": {
+      "title": "Renamed NirCmd.EXE Execution",
+      "id": "264982dc-dbad-4dce-b707-1e0d3e0f73d9",
+      "status": "test",
+      "description": "Detects the execution of a renamed \"NirCmd.exe\" binary based on the PE metadata fields.",
+      "references": [
+        "https://www.microsoft.com/en-us/security/blog/2024/01/17/new-ttps-observed-in-mint-sandstorm-campaign-targeting-high-profile-individuals-at-universities-and-research-orgs/",
+        "https://www.nirsoft.net/utils/nircmd.html"
+      ],
+      "author": "X__Junior (Nextron Systems)",
+      "date": "2024-03-11",
+      "tags": [
+        "attack.execution",
+        "attack.t1059",
+        "attack.defense-evasion",
+        "attack.t1202"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "OriginalFileName": "NirCmd.exe"
+        },
+        "filter_main_img": {
+          "Image|endswith": [
+            "\\nircmd.exe",
+            "\\nircmdc.exe"
+          ]
+        },
+        "condition": "selection and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_renamed_nircmd.yml"
+  },
+  "13": {
+    "url": "https://blog.talosintelligence.com/gophish-powerrat-dcrat/",
+    "markdown": "# Threat actor abuses Gophish to deliver new PowerRAT and DCRAT October 22 **Categories:** RAT, Threats --- - Cisco Talos recently discovered a phishing campaign using an open-source phishing toolkit called Gophish by an unknown threat actor. - The campaign involves modular infection chains that are either Maldoc or HTML-based infections and require the victim’s intervention to trigger the infection chain. - Talos discovered an undocumented PowerShell RAT we’re calling PowerRAT, as one of the payloads and another infamous Remote Access Tool (RAT) DCRAT. - We found a few placeholders for base64 encoded PowerShell scripts in the PowerRAT, indicating that",
+    "sigma_rule": {
+      "title": "Schedule Task Creation From Env Variable Or Potentially Suspicious Path Via Schtasks.EXE",
+      "id": "81325ce1-be01-4250-944f-b4789644556f",
+      "related": [
+        {
+          "id": "43f487f0-755f-4c2a-bce7-d6d2eec2fcf8",
+          "type": "derived"
+        }
+      ],
+      "status": "test",
+      "description": "Detects Schtask creations that point to a suspicious folder or an environment variable often used by malware",
+      "references": [
+        "https://www.welivesecurity.com/2022/01/18/donot-go-do-not-respawn/",
+        "https://www.joesandbox.com/analysis/514608/0/html#324415FF7D8324231381BAD48A052F85DF04",
+        "https://blog.talosintelligence.com/gophish-powerrat-dcrat/"
+      ],
+      "author": "Florian Roth (Nextron Systems)",
+      "date": "2022-02-21",
+      "modified": "2024-10-28",
+      "tags": [
+        "attack.execution",
+        "attack.t1053.005"
+      ],
+      "logsource": {
+        "product": "windows",
+        "category": "process_creation"
+      },
+      "detection": {
+        "selection_1_create": {
+          "Image|endswith": "\\schtasks.exe",
+          "CommandLine|contains": " /create "
+        },
+        "selection_1_all_folders": {
+          "CommandLine|contains": [
+            ":\\Perflogs",
+            ":\\Users\\All Users\\",
+            ":\\Users\\Default\\",
+            ":\\Users\\Public",
+            ":\\Windows\\Temp",
+            "\\AppData\\Local\\",
+            "\\AppData\\Roaming\\",
+            "%AppData%",
+            "%Public%"
+          ]
+        },
+        "selection_2_parent": {
+          "ParentCommandLine|endswith": "\\svchost.exe -k netsvcs -p -s Schedule"
+        },
+        "selection_2_some_folders": {
+          "CommandLine|contains": [
+            ":\\Perflogs",
+            ":\\Windows\\Temp",
+            "\\Users\\Public",
+            "%Public%"
+          ]
+        },
+        "filter_optional_other": [
+          {
+            "ParentCommandLine|contains": "unattended.ini"
+          },
+          {
+            "CommandLine|contains": "update_task.xml"
+          }
+        ],
+        "filter_optional_team_viewer": {
+          "CommandLine|contains": "/Create /TN TVInstallRestore /TR"
+        },
+        "filter_optional_avira_install": {
+          "CommandLine|contains|all": [
+            "/Create /Xml \"C:\\Users\\",
+            "\\AppData\\Local\\Temp\\.CR.",
+            "Avira_Security_Installation.xml"
+          ]
+        },
+        "filter_optional_avira_other": {
+          "CommandLine|contains|all": [
+            "/Create /F /TN",
+            "/Xml ",
+            "\\AppData\\Local\\Temp\\is-",
+            "Avira_"
+          ],
+          "CommandLine|contains": [
+            ".tmp\\UpdateFallbackTask.xml",
+            ".tmp\\WatchdogServiceControlManagerTimeout.xml",
+            ".tmp\\SystrayAutostart.xml",
+            ".tmp\\MaintenanceTask.xml"
+          ]
+        },
+        "filter_optional_klite_codec": {
+          "CommandLine|contains|all": [
+            "\\AppData\\Local\\Temp\\",
+            "/Create /TN \"klcp_update\" /XML ",
+            "\\klcp_update_task.xml"
+          ]
+        },
+        "condition": "( all of selection_1_* or all of selection_2_* ) and not 1 of filter_optional_*"
+      },
+      "falsepositives": [
+        "Benign scheduled tasks creations or executions that happen often during software installations",
+        "Software that uses the AppData folder and scheduled tasks to update the software in the AppData folders"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_schtasks_env_folder.yml"
+  },
+  "14": {
+    "url": "https://www.elastic.co/security-labs/Hunting-for-Suspicious-Windows-Libraries-for-Execution-and-Evasion",
+    "markdown": "# Hunting for Suspicious Windows Libraries for Execution and Defense Evasion **Published on:** 1 March 2023 Learn more about discovering threats by hunting through DLL load events, one way to reveal the presence of known and unknown malware in noisy process event data. --- **Categories:** Security operations, Security research, Detection science Dynamic-link library (DLL) image loads is one of the noisiest types of event in Windows, which may discourage defenders from using it for detection engineering or threat hunting. Even if logged in some environments, it’s often limited to function-specific DLLs such as scheduled tasks (taskschd.dll), Windows Management Instrumentation (wmiutil.dll)",
+    "sigma_rule": {
+      "title": "Unsigned DLL Loaded by Windows Utility",
+      "id": "b5de0c9a-6f19-43e0-af4e-55ad01f550af",
+      "status": "test",
+      "description": "Detects windows utilities loading an unsigned or untrusted DLL.\nAdversaries often abuse those programs to proxy execution of malicious code.\n",
+      "references": [
+        "https://www.elastic.co/security-labs/Hunting-for-Suspicious-Windows-Libraries-for-Execution-and-Evasion",
+        "https://akhere.hashnode.dev/hunting-unsigned-dlls-using-kql",
+        "https://unit42.paloaltonetworks.com/unsigned-dlls/?web_view=true"
+      ],
+      "author": "Swachchhanda Shrawan Poudel",
+      "date": "2024-02-28",
+      "modified": "2024-03-07",
+      "tags": [
+        "attack.t1218.011",
+        "attack.t1218.010",
+        "attack.defense-evasion"
+      ],
+      "logsource": {
+        "product": "windows",
+        "category": "image_load"
+      },
+      "detection": {
+        "selection": {
+          "Image|endswith": [
+            "\\InstallUtil.exe",
+            "\\RegAsm.exe",
+            "\\RegSvcs.exe",
+            "\\regsvr32.exe",
+            "\\rundll32.exe"
+          ]
+        },
+        "filter_main_signed": {
+          "Signed": "true"
+        },
+        "filter_main_sig_status": {
+          "SignatureStatus": [
+            "errorChaining",
+            "errorCode_endpoint",
+            "errorExpired",
+            "trusted"
+          ]
+        },
+        "filter_main_signed_null": {
+          "Signed": null
+        },
+        "filter_main_signed_empty": {
+          "Signed": [
+            "",
+            "-"
+          ]
+        },
+        "filter_main_sig_status_null": {
+          "SignatureStatus": null
+        },
+        "filter_main_sig_status_empty": {
+          "SignatureStatus": [
+            "",
+            "-"
+          ]
+        },
+        "condition": "selection and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\image_load\\image_load_susp_unsigned_dll.yml"
+  },
+  "15": {
+    "url": "https://any.run/report/cf0de0c3ff0e337e47088e11c0867dda9709eaafa0a1c095c132e9b87722158e/34221348-072d-4b70-93f3-aa71f6ebecad/",
+    "markdown": "# General Info | **File name:** | **hola.doc** | | ------------------ | -------------------------------------------------------------------------------------- | | **Full analysis:** | https://app.any.run/tasks/34221348-072d-4b70-93f3-aa71f6ebecad | | **Verdict:** | Malicious activity | | **Threats:** | Trojan | | **Analysis date:** | July 15, 2021 at 18:49:35 | | **OS:** | Windows 7 Professional Service Pack 1 (build: 7601, 32 bit) | | **Tags:** | trojan | | **Indicators:** | Multiprocessing, Network threats | | **MIME:** | text/xml | | **File info:** | XML 1.0 document, UTF-8 Unicode text, with very long lines, with CRLF line terminators | | **MD5:** | 843F6C0C24BFC31B6A19471935A092DA | | **SHA1:** | 7B811D26A4852B9D564C4DAB878BD672BBBE7078",
+    "sigma_rule": {
+      "title": "Regsvr32 Execution From Potential Suspicious Location",
+      "id": "9525dc73-0327-438c-8c04-13c0e037e9da",
+      "related": [
+        {
+          "id": "8e2b24c9-4add-46a0-b4bb-0057b4e6187d",
+          "type": "obsolete"
+        }
+      ],
+      "status": "test",
+      "description": "Detects execution of regsvr32 where the DLL is located in a potentially suspicious location.",
+      "references": [
+        "https://web.archive.org/web/20171001085340/https://subt0x10.blogspot.com/2017/04/bypass-application-whitelisting-script.html",
+        "https://any.run/report/cf0de0c3ff0e337e47088e11c0867dda9709eaafa0a1c095c132e9b87722158e/34221348-072d-4b70-93f3-aa71f6ebecad/"
+      ],
+      "author": "Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2023-05-26",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1218.010"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\regsvr32.exe"
+          },
+          {
+            "OriginalFileName": "REGSVR32.EXE"
+          }
+        ],
+        "selection_cli": {
+          "CommandLine|contains": [
+            ":\\ProgramData\\",
+            ":\\Temp\\",
+            ":\\Users\\Public\\",
+            ":\\Windows\\Temp\\",
+            "\\AppData\\Local\\Temp\\",
+            "\\AppData\\Roaming\\"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Some installers might execute \"regsvr32\" with DLLs located in %TEMP% or in %PROGRAMDATA%. Apply additional filters if necessary."
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_regsvr32_susp_exec_path_1.yml"
+  },
+  "16": {
+    "url": "https://web.archive.org/web/20221026202428/https://gist.github.com/code-scrap/d7f152ffcdb3e0b02f7f394f5187f008",
+    "markdown": "# code-scrap / README.md Table Top With Teeth - Training Exercise ## README.md ### Instructions The following script is designed to create artifacts that teams can use to hunt, new or interesting capabilities. The following table top is based on the code here: https://github.com/code-scrap/DynamicWrapperDotNet This script is self-contained. It should dynamically write a DLL to disk and load it into `cscript.exe`. To Invoke: ``` cscript.exe stranger_things.js ``` This example expects a 64bit system. You can modify that if you want ARM or x86 etc. ### Ideas of what to hunt/test: 1. Did the anti-malware engine detect a malicious script? 2.",
+    "sigma_rule": {
+      "title": "Suspicious DotNET CLR Usage Log Artifact",
+      "id": "e0b06658-7d1d-4cd3-bf15-03467507ff7c",
+      "related": [
+        {
+          "id": "4508a70e-97ef-4300-b62b-ff27992990ea",
+          "type": "derived"
+        },
+        {
+          "id": "e4b63079-6198-405c-abd7-3fe8b0ce3263",
+          "type": "obsolete"
+        }
+      ],
+      "status": "test",
+      "description": "Detects the creation of Usage Log files by the CLR (clr.dll). These files are named after the executing process once the assembly is finished executing for the first time in the (user) session context.",
+      "references": [
+        "https://bohops.com/2021/03/16/investigating-net-clr-usage-log-tampering-techniques-for-edr-evasion/",
+        "https://github.com/olafhartong/sysmon-modular/blob/fa1ae53132403d262be2bbd7f17ceea7e15e8c78/11_file_create/include_dotnet.xml",
+        "https://web.archive.org/web/20221026202428/https://gist.github.com/code-scrap/d7f152ffcdb3e0b02f7f394f5187f008",
+        "https://web.archive.org/web/20230329154538/https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html"
+      ],
+      "author": "frack113, omkar72, oscd.community, Wojciech Lesicki",
+      "date": "2022-11-18",
+      "modified": "2023-02-23",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1218"
+      ],
+      "logsource": {
+        "category": "file_event",
+        "product": "windows",
+        "definition": "Requirements: UsageLogs folder must be monitored by the sysmon configuration"
+      },
+      "detection": {
+        "selection": {
+          "TargetFilename|endswith": [
+            "\\UsageLogs\\cmstp.exe.log",
+            "\\UsageLogs\\cscript.exe.log",
+            "\\UsageLogs\\mshta.exe.log",
+            "\\UsageLogs\\msxsl.exe.log",
+            "\\UsageLogs\\regsvr32.exe.log",
+            "\\UsageLogs\\rundll32.exe.log",
+            "\\UsageLogs\\svchost.exe.log",
+            "\\UsageLogs\\wscript.exe.log",
+            "\\UsageLogs\\wmic.exe.log"
+          ]
+        },
+        "filter_main_rundll32": {
+          "ParentImage|endswith": "\\MsiExec.exe",
+          "ParentCommandLine|contains": " -Embedding",
+          "Image|endswith": "\\rundll32.exe",
+          "CommandLine|contains|all": [
+            "Temp",
+            "zzzzInvokeManagedCustomActionOutOfProc"
+          ]
+        },
+        "condition": "selection and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Rundll32.exe with zzzzInvokeManagedCustomActionOutOfProc in command line and msiexec.exe as parent process - https://twitter.com/SBousseaden/status/1388064061087260675"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\file\\file_event\\file_event_win_net_cli_artefact.yml"
+  },
+  "17": {
+    "url": "https://thedfirreport.com/2022/06/06/will-the-real-msiexec-please-stand-up-exploit-leads-to-data-exfiltration/",
+    "markdown": "# Will the Real Msiexec Please Stand Up? Exploit Leads to Data Exfiltration **Published on:** June 6, 2022 ## Introduction In this multi-day intrusion, we observed a threat actor gain initial access to an organization by exploiting a vulnerability in ManageEngine SupportCenter Plus. The threat actor discovered files on the server, dumped credentials using a web shell, moved laterally to key servers using Plink and RDP, and exfiltrated sensitive information using the web shell and RDP. The FBI and CISA published an advisory noting that APT attackers were using CVE-2021-44077 to gain initial access to the networks of organizations in",
+    "sigma_rule": {
+      "title": "Renamed Plink Execution",
+      "id": "1c12727d-02bf-45ff-a9f3-d49806a3cf43",
+      "status": "test",
+      "description": "Detects the execution of a renamed version of the Plink binary",
+      "references": [
+        "https://thedfirreport.com/2022/06/06/will-the-real-msiexec-please-stand-up-exploit-leads-to-data-exfiltration/",
+        "https://the.earth.li/~sgtatham/putty/0.58/htmldoc/Chapter7.html"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2022-06-06",
+      "modified": "2023-02-03",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1036"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": [
+          {
+            "OriginalFileName": "Plink"
+          },
+          {
+            "CommandLine|contains|all": [
+              " -l forward",
+              " -P ",
+              " -R "
+            ]
+          }
+        ],
+        "filter": {
+          "Image|endswith": "\\plink.exe"
+        },
+        "condition": "selection and not filter"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_renamed_plink.yml"
+  },
+  "18": {
+    "url": "http://www.hexacorn.com/blog/2013/01/19/beyond-good-ol-run-key-part-3/",
+    "markdown": "# Beyond good ol’ Run key, Part 3 Posted on 2013-01-19 Possible Autostart/start mechanisms that are built-in ‘natively’ in Windows and also available by means of extra features offered by many applications go beyond typical path locations and registry keys highlighted by popular programs and scripts like Autoruns and SilentRunners. I have covered some of the non-standard persistence techniques in 2 older posts in the series here and here, but as usual – there is always more to write about. In this post I will cover another batch of less known and possibly ‘obscure’ technique that could be potentially used",
+    "sigma_rule": {
+      "title": "New DLL Added to AppCertDlls Registry Key",
+      "id": "6aa1d992-5925-4e9f-a49b-845e51d1de01",
+      "status": "test",
+      "description": "Dynamic-link libraries (DLLs) that are specified in the AppCertDLLs value in the Registry key can be abused to obtain persistence and privilege escalation\nby causing a malicious DLL to be loaded and run in the context of separate processes on the computer.\n",
+      "references": [
+        "http://www.hexacorn.com/blog/2013/01/19/beyond-good-ol-run-key-part-3/",
+        "https://eqllib.readthedocs.io/en/latest/analytics/14f90406-10a0-4d36-a672-31cabe149f2f.html"
+      ],
+      "author": "Ilyas Ochkov, oscd.community",
+      "date": "2019-10-25",
+      "modified": "2021-11-27",
+      "tags": [
+        "attack.persistence",
+        "attack.t1546.009"
+      ],
+      "logsource": {
+        "category": "registry_event",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": [
+          {
+            "TargetObject": "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCertDlls"
+          },
+          {
+            "NewName": "HKLM\\SYSTEM\\CurentControlSet\\Control\\Session Manager\\AppCertDlls"
+          }
+        ],
+        "condition": "selection"
+      },
+      "fields": [
+        "EventID",
+        "Image",
+        "TargetObject",
+        "NewName"
+      ],
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\registry\\registry_event\\registry_event_new_dll_added_to_appcertdlls_registry_key.yml"
+  },
+  "19": {
+    "url": "https://www.microsoft.com/en-us/security/blog/2021/07/13/microsoft-discovers-threat-actor-targeting-solarwinds-serv-u-software-with-0-day-exploit/",
+    "markdown": "# Microsoft discovers threat actor targeting SolarWinds Serv-U software with 0-day exploit **Published on** July 13, 2021 --- Microsoft has detected a 0-day remote code execution exploit being used to attack SolarWinds Serv-U FTP software in limited and targeted attacks. The Microsoft Threat Intelligence Center (MSTIC) attributes this campaign with high confidence to DEV-0322, a group operating out of China, based on observed victimology, tactics, and procedures. The vulnerability being exploited is CVE-2021-35211, which was recently patched by SolarWinds. The vulnerability, which Microsoft reported to SolarWinds, exists in Serv-U’s implementation of the Secure Shell (SSH) protocol. If Serv-U’s SSH is",
+    "sigma_rule": {
+      "title": "Suspicious Script Execution From Temp Folder",
+      "id": "a6a39bdb-935c-4f0a-ab77-35f4bbf44d33",
+      "status": "test",
+      "description": "Detects a suspicious script executions from temporary folder",
+      "references": [
+        "https://www.microsoft.com/en-us/security/blog/2021/07/13/microsoft-discovers-threat-actor-targeting-solarwinds-serv-u-software-with-0-day-exploit/"
+      ],
+      "author": "Florian Roth (Nextron Systems), Max Altgelt (Nextron Systems), Tim Shelton",
+      "date": "2021-07-14",
+      "modified": "2022-10-05",
+      "tags": [
+        "attack.execution",
+        "attack.t1059"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "Image|endswith": [
+            "\\powershell.exe",
+            "\\pwsh.exe",
+            "\\mshta.exe",
+            "\\wscript.exe",
+            "\\cscript.exe"
+          ],
+          "CommandLine|contains": [
+            "\\Windows\\Temp",
+            "\\Temporary Internet",
+            "\\AppData\\Local\\Temp",
+            "\\AppData\\Roaming\\Temp",
+            "%TEMP%",
+            "%TMP%",
+            "%LocalAppData%\\Temp"
+          ]
+        },
+        "filter": {
+          "CommandLine|contains": [
+            " >",
+            "Out-File",
+            "ConvertTo-Json",
+            "-WindowStyle hidden -Verb runAs",
+            "\\Windows\\system32\\config\\systemprofile\\AppData\\Local\\Temp\\Amazon\\EC2-Windows\\"
+          ]
+        },
+        "condition": "selection and not filter"
+      },
+      "falsepositives": [
+        "Administrative scripts"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_susp_script_exec_from_temp.yml"
+  },
+  "20": {
+    "url": "https://github.com/p3nt4/PowerShdll",
+    "markdown": "# PowerShdll Run PowerShell with dlls only. Does not require access to powershell.exe as it uses powershell automation dlls. PowerShdll can be run with: rundll32.exe, installutil.exe, regsvcs.exe, regasm.exe, regsvr32.exe or as a standalone executable. ## dll mode: ### Rundll32: ``` Usage: rundll32 PowerShdll,main <script> rundll32 PowerShdll,main -h Display this message rundll32 PowerShdll,main -f <path> Run the script passed as argument rundll32 PowerShdll,main -w Start an interactive console in a new window (Default) rundll32 PowerShdll,main -i Start an interactive console in this console If you do not have an interractive console, use -n to avoid crashes on output ``` ### Alternatives",
+    "sigma_rule": {
+      "title": "PowerShell Core DLL Loaded By Non PowerShell Process",
+      "id": "092bc4b9-3d1d-43b4-a6b4-8c8acd83522f",
+      "related": [
+        {
+          "id": "867613fb-fa60-4497-a017-a82df74a172c",
+          "type": "obsolete"
+        },
+        {
+          "id": "fe6e002f-f244-4278-9263-20e4b593827f",
+          "type": "obsolete"
+        }
+      ],
+      "status": "test",
+      "description": "Detects loading of essential DLLs used by PowerShell by non-PowerShell process.\nDetects behavior similar to meterpreter's \"load powershell\" extension.\n",
+      "references": [
+        "https://adsecurity.org/?p=2921",
+        "https://github.com/p3nt4/PowerShdll"
+      ],
+      "author": "Tom Kern, oscd.community, Natalia Shornikova, Tim Shelton, Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research)",
+      "date": "2019-11-14",
+      "modified": "2024-01-17",
+      "tags": [
+        "attack.t1059.001",
+        "attack.execution"
+      ],
+      "logsource": {
+        "category": "image_load",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": [
+          {
+            "Description": "System.Management.Automation"
+          },
+          {
+            "OriginalFileName": "System.Management.Automation.dll"
+          },
+          {
+            "ImageLoaded|endswith": [
+              "\\System.Management.Automation.dll",
+              "\\System.Management.Automation.ni.dll"
+            ]
+          }
+        ],
+        "filter_main_generic": {
+          "Image|endswith": [
+            ":\\Program Files\\PowerShell\\7\\pwsh.exe",
+            ":\\Windows\\System32\\dsac.exe",
+            ":\\WINDOWS\\System32\\RemoteFXvGPUDisablement.exe",
+            ":\\Windows\\System32\\runscripthelper.exe",
+            ":\\WINDOWS\\System32\\sdiagnhost.exe",
+            ":\\Windows\\System32\\ServerManager.exe",
+            ":\\Windows\\System32\\SyncAppvPublishingServer.exe",
+            ":\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell_ise.exe",
+            ":\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            ":\\Windows\\System32\\winrshost.exe",
+            ":\\Windows\\System32\\wsmprovhost.exe",
+            ":\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell_ise.exe",
+            ":\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe",
+            ":\\Windows\\SysWOW64\\winrshost.exe",
+            ":\\Windows\\SysWOW64\\wsmprovhost.exe"
+          ]
+        },
+        "filter_main_dotnet": {
+          "Image|contains": [
+            ":\\Windows\\Microsoft.NET\\Framework\\",
+            ":\\Windows\\Microsoft.NET\\Framework64\\"
+          ],
+          "Image|endswith": "\\mscorsvw.exe"
+        },
+        "filter_optional_sql_server_mgmt": {
+          "Image|contains": [
+            ":\\Program Files (x86)\\Microsoft SQL Server Management Studio",
+            ":\\Program Files\\Microsoft SQL Server Management Studio"
+          ],
+          "Image|endswith": "\\IDE\\Ssms.exe"
+        },
+        "filter_optional_sql_server_tools": {
+          "Image|contains": [
+            ":\\Program Files (x86)\\Microsoft SQL Server\\",
+            ":\\Program Files\\Microsoft SQL Server\\"
+          ],
+          "Image|endswith": "\\Tools\\Binn\\SQLPS.exe"
+        },
+        "filter_optional_citrix": {
+          "Image|endswith": "\\Citrix\\ConfigSync\\ConfigSyncRun.exe"
+        },
+        "filter_optional_vs": {
+          "Image|contains": [
+            ":\\Program Files (x86)\\Microsoft Visual Studio\\",
+            ":\\Program Files\\Microsoft Visual Studio\\"
+          ]
+        },
+        "filter_optional_chocolatey": {
+          "Image|contains": ":\\ProgramData\\chocolatey\\choco.exe"
+        },
+        "filter_optional_nextron": {
+          "Image|contains": ":\\Windows\\Temp\\asgard2-agent\\",
+          "Image|endswith": [
+            "\\thor64.exe",
+            "\\thor.exe"
+          ]
+        },
+        "filter_optional_aurora": {
+          "Image": null
+        },
+        "condition": "selection and not 1 of filter_main_* and not 1 of filter_optional_*"
+      },
+      "falsepositives": [
+        "Used by some .NET binaries, minimal on user workstation.",
+        "Used by Microsoft SQL Server Management Studio"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\image_load\\image_load_dll_system_management_automation_susp_load.yml"
+  },
+  "21": {
+    "url": "https://github.com/Neo23x0/Raccine/blob/20a569fa21625086433dcce8bb2765d0ea08dcb6/yara/mal_revil.yar",
+    "markdown": "# Raccine / yara / mal_revil.yar ``` rule MAL_REvil_Dec20 { meta: description = \"Detects PowerShell invocation as used by REvil loader\" author = \"Florian Roth\" date = \"2020-12-02\" reference = \"https://app.any.run/tasks/b5146ffd-328f-4d6f-9bf7-c544d02f1d47/\" score = 60 strings: /* Encoded Command */ $ = \" -Enc \\\"PAA\" ascii /* [Reflection.Assembly]::Load( */ $ = \"WwBSAGUAZgBsAGUAYwB0AGkAbwBuAC4AQQBzAHMAZQBtAGIAbAB5AF0AOgA6AEwAbwBhAGQAKA\" ascii $ = \"sAUgBlAGYAbABlAGMAdABpAG8AbgAuAEEAcwBzAGUAbQBiAGwAeQBdADoAOgBMAG8AYQBkACgA\" ascii $ = \"bAFIAZQBmAGwAZQBjAHQAaQBvAG4ALgBBAHMAcwBlAG0AYgBsAHkAXQA6ADoATABvAGEAZAAoA\" ascii /* Win32_Shadowcopy | ForEach-Object */ $ = \"VwBpAG4AMwAyAF8AUwBoAGEAZABvAHcAYwBvAHAAeQAgAHwAIABGAG8AcgBFAGEAYwBoAC0ATwBiAGoAZQBjAHQA\" ascii $ = \"cAaQBuADMAMgBfAFMAaABhAGQAbwB3AGMAbwBwAHkAIAB8ACAARgBvAHIARQBhAGMAaAAtAE8AYgBqAGUAYwB0A\" ascii $ = \"XAGkAbgAzADIAXwBTAGgAYQBkAG8AdwBjAG8AcAB5ACAAfAAgAEYAbwByAEUAYQBjAGgALQBPAGIAagBlAGMAdA\" ascii condition: 1 of them } ```",
+    "sigma_rule": {
+      "title": "PowerShell Base64 Encoded Reflective Assembly Load",
+      "id": "62b7ccc9-23b4-471e-aa15-6da3663c4d59",
+      "related": [
+        {
+          "id": "9c0295ce-d60d-40bd-bd74-84673b7592b1",
+          "type": "similar"
+        }
+      ],
+      "status": "test",
+      "description": "Detects base64 encoded .NET reflective loading of Assembly",
+      "references": [
+        "https://github.com/Neo23x0/Raccine/blob/20a569fa21625086433dcce8bb2765d0ea08dcb6/yara/mal_revil.yar",
+        "https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/"
+      ],
+      "author": "Christian Burkard (Nextron Systems), pH-T (Nextron Systems)",
+      "date": "2022-03-01",
+      "modified": "2023-01-30",
+      "tags": [
+        "attack.execution",
+        "attack.t1059.001",
+        "attack.defense-evasion",
+        "attack.t1027",
+        "attack.t1620"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "CommandLine|contains": [
+            "WwBSAGUAZgBsAGUAYwB0AGkAbwBuAC4AQQBzAHMAZQBtAGIAbAB5AF0AOgA6AEwAbwBhAGQAKA",
+            "sAUgBlAGYAbABlAGMAdABpAG8AbgAuAEEAcwBzAGUAbQBiAGwAeQBdADoAOgBMAG8AYQBkACgA",
+            "bAFIAZQBmAGwAZQBjAHQAaQBvAG4ALgBBAHMAcwBlAG0AYgBsAHkAXQA6ADoATABvAGEAZAAoA",
+            "AFsAcgBlAGYAbABlAGMAdABpAG8AbgAuAGEAcwBzAGUAbQBiAGwAeQBdADoAOgAoACIATABvAGEAZAAiAC",
+            "BbAHIAZQBmAGwAZQBjAHQAaQBvAG4ALgBhAHMAcwBlAG0AYgBsAHkAXQA6ADoAKAAiAEwAbwBhAGQAIgAp",
+            "AWwByAGUAZgBsAGUAYwB0AGkAbwBuAC4AYQBzAHMAZQBtAGIAbAB5AF0AOgA6ACgAIgBMAG8AYQBkACIAK",
+            "WwBSAGUAZgBsAGUAYwB0AGkAbwBuAC4AQQBzAHMAZQBtAGIAbAB5AF0AOgA6ACgAIgBMAG8AYQBkACIAKQ",
+            "sAUgBlAGYAbABlAGMAdABpAG8AbgAuAEEAcwBzAGUAbQBiAGwAeQBdADoAOgAoACIATABvAGEAZAAiACkA",
+            "bAFIAZQBmAGwAZQBjAHQAaQBvAG4ALgBBAHMAcwBlAG0AYgBsAHkAXQA6ADoAKAAiAEwAbwBhAGQAIgApA",
+            "WwByAGUAZgBsAGUAYwB0AGkAbwBuAC4AYQBzAHMAZQBtAGIAbAB5AF0AOgA6AEwAbwBhAGQAKA",
+            "sAcgBlAGYAbABlAGMAdABpAG8AbgAuAGEAcwBzAGUAbQBiAGwAeQBdADoAOgBMAG8AYQBkACgA",
+            "bAHIAZQBmAGwAZQBjAHQAaQBvAG4ALgBhAHMAcwBlAG0AYgBsAHkAXQA6ADoATABvAGEAZAAoA"
+          ]
+        },
+        "condition": "selection"
+      },
+      "fields": [
+        "CommandLine"
+      ],
+      "falsepositives": [
+        "Unlikely"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_powershell_base64_reflection_assembly_load.yml"
+  },
+  "22": {
+    "url": "https://github.com/redcanaryco/atomic-red-team/blob/4ae9580a1a8772db87a1b6cdb0d03e5af231e966/atomics/T1137.006/T1137.006.md",
+    "markdown": "# T1137.006 - Office Application Startup: Add-ins ## Description from ATT&CK Adversaries may abuse Microsoft Office add-ins to obtain persistence on a compromised system. Office add-ins can be used to add functionality to Office programs. (Citation: Microsoft Office Add-ins) There are different types of add-ins that can be used by the various Office products; including Word/Excel add-in Libraries (WLL/XLL), VBA add-ins, Office Component Object Model (COM) add-ins, automation add-ins, VBA Editor (VBE), Visual Studio Tools for Office (VSTO) add-ins, and Outlook add-ins. (Citation: MRWLabs Office Persistence Add-ins)(Citation: FireEye Mail CDS 2018) Add-ins can be used to obtain persistence because they",
+    "sigma_rule": {
+      "title": "Potential Persistence Via Microsoft Office Add-In",
+      "id": "8e1cb247-6cf6-42fa-b440-3f27d57e9936",
+      "status": "test",
+      "description": "Detects potential persistence activity via startup add-ins that load when Microsoft Office starts (.wll/.xll are simply .dll fit for Word or Excel).",
+      "references": [
+        "Internal Research",
+        "https://labs.withsecure.com/publications/add-in-opportunities-for-office-persistence",
+        "https://github.com/redcanaryco/atomic-red-team/blob/4ae9580a1a8772db87a1b6cdb0d03e5af231e966/atomics/T1137.006/T1137.006.md"
+      ],
+      "author": "NVISO",
+      "date": "2020-05-11",
+      "modified": "2023-02-08",
+      "tags": [
+        "attack.persistence",
+        "attack.t1137.006"
+      ],
+      "logsource": {
+        "category": "file_event",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_wlldropped": {
+          "TargetFilename|contains": "\\Microsoft\\Word\\Startup\\",
+          "TargetFilename|endswith": ".wll"
+        },
+        "selection_xlldropped": {
+          "TargetFilename|contains": "\\Microsoft\\Excel\\Startup\\",
+          "TargetFilename|endswith": ".xll"
+        },
+        "selection_xladropped": {
+          "TargetFilename|contains": "Microsoft\\Excel\\XLSTART\\",
+          "TargetFilename|endswith": ".xlam"
+        },
+        "selection_generic": {
+          "TargetFilename|contains": "\\Microsoft\\Addins\\",
+          "TargetFilename|endswith": [
+            ".xlam",
+            ".xla",
+            ".ppam"
+          ]
+        },
+        "condition": "1 of selection_*"
+      },
+      "falsepositives": [
+        "Legitimate add-ins"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\file\\file_event\\file_event_win_office_addin_persistence.yml"
+  },
+  "23": {
+    "url": "https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/",
+    "markdown": "# Inside Malicious Windows Apps for Malware Deployment **Date:** July 14, 2022 This article discusses Windows Apps – Windows applications packaged into *APPX* or *MSIX* packages – as a medium to deploy malware. Though not as widely abused as other infection vectors, there have been a number of recent high profile attacks that use Windows Apps. - **November, 2021:** BazarBackdoor was distributed in the form of an *APPX* package. - **December, 2021:** Emotet malware was distributed by abusing a spoofing vulnerability in the Windows App Installer, software that installs Windows Apps. - **January, 2022:** Malicious Windows Apps in *APPX* format",
+    "sigma_rule": {
+      "title": "Potential Malicious AppX Package Installation Attempts",
+      "id": "09d3b48b-be17-47f5-bf4e-94e7e75d09ce",
+      "status": "test",
+      "description": "Detects potential installation or installation attempts of known malicious appx packages",
+      "references": [
+        "https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/",
+        "https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/",
+        "https://forensicitguy.github.io/analyzing-magnitude-magniber-appx/"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2023-01-11",
+      "modified": "2023-01-12",
+      "tags": [
+        "attack.defense-evasion"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "appxdeployment-server"
+      },
+      "detection": {
+        "selection": {
+          "EventID": [
+            400,
+            401
+          ],
+          "PackageFullName|contains": "3669e262-ec02-4e9d-bcb4-3d008b4afac9"
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Rare occasions where a malicious package uses the exact same name and version as a legtimate application"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\appxdeployment_server\\win_appxdeployment_server_mal_appx_names.yml"
+  },
+  "24": {
+    "url": "https://medium.com/@reegun/unsanitized-file-validation-leads-to-malicious-payload-download-via-office-binaries-202d02db7191",
+    "markdown": "# Unsanitized file validation leads to Malicious payload download via Office binaries. Update 23-Sep-2019 — Added to Lolbas|Lolbin contribution. https://lolbas-project.github.io/lolbas/OtherMSBinaries/Winword/ https://lolbas-project.github.io/lolbas/OtherMSBinaries/Powerpnt/ https://lolbas-project.github.io/lolbas/OtherMSBinaries/Excel/ As a part of finding vulnerable endpoints to improve defence, I used to reckon legitimate binaries on any chance of masking for payload download/execute. I focused my research towards Office binaries (winword/powerpnt/excel), My aim is to download a payload remotely via legitimate binaries by application whitelisting and execute via Office binaries. I came to know that we can able to open a remote document as Read-Only, I focused on that feature. ## 1. Payload Download — No proper",
+    "sigma_rule": {
+      "title": "Potential Arbitrary File Download Using Office Application",
+      "id": "4ae3e30b-b03f-43aa-87e3-b622f4048eed",
+      "related": [
+        {
+          "id": "0c79148b-118e-472b-bdb7-9b57b444cc19",
+          "type": "obsolete"
+        }
+      ],
+      "status": "test",
+      "description": "Detects potential arbitrary file download using a Microsoft Office application",
+      "references": [
+        "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Winword/",
+        "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Powerpnt/",
+        "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Excel/",
+        "https://medium.com/@reegun/unsanitized-file-validation-leads-to-malicious-payload-download-via-office-binaries-202d02db7191"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems), Beyu Denis, oscd.community",
+      "date": "2022-05-17",
+      "modified": "2023-06-22",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1202"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": [
+              "\\EXCEL.EXE",
+              "\\POWERPNT.EXE",
+              "\\WINWORD.exe"
+            ]
+          },
+          {
+            "OriginalFileName": [
+              "Excel.exe",
+              "POWERPNT.EXE",
+              "WinWord.exe"
+            ]
+          }
+        ],
+        "selection_http": {
+          "CommandLine|contains": [
+            "http://",
+            "https://"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_office_arbitrary_cli_download.yml"
+  },
+  "25": {
+    "url": "https://www.huntress.com/blog/slashandgrab-screen-connect-post-exploitation-in-the-wild-cve-2024-1709-cve-2024-1708",
+    "markdown": "# SlashAndGrab: ScreenConnect Post-Exploitation in the Wild (CVE-2024-1709 & CVE-2024-1708) **February 23, 2024** --- ## Table of Contents: - Adversaries Deploying Ransomware - Adversaries Enumerating - Adversary Cryptocurrency Miners - Adversaries Installing Additional Remote Access - Downloading Tools and Payloads - Adversaries Dropping Cobalt Strike - Adversaries Persisting - Wrapping Up - Appendix --- Since February 19, Huntress has been sharing technical details of the ScreenConnect vulnerability we’re calling “SlashAndGrab.” In previous posts, we shared the details of this vulnerability, its exploit, and shared detection guidance. In this article, we’ve collected and curated threat actor activity fresh from the Huntress",
+    "sigma_rule": {
+      "title": "Remote Access Tool - ScreenConnect Potential Suspicious Remote Command Execution",
+      "id": "7b582f1a-b318-4c6a-bf4e-66fe49bf55a5",
+      "related": [
+        {
+          "id": "d1a401ab-8c47-4e86-a7d8-2460b6a53e4a",
+          "type": "derived"
+        }
+      ],
+      "status": "test",
+      "description": "Detects potentially suspicious child processes launched via the ScreenConnect client service.\n",
+      "references": [
+        "https://www.mandiant.com/resources/telegram-malware-iranian-espionage",
+        "https://docs.connectwise.com/ConnectWise_Control_Documentation/Get_started/Host_client/View_menu/Backstage_mode",
+        "https://www.huntress.com/blog/slashandgrab-screen-connect-post-exploitation-in-the-wild-cve-2024-1709-cve-2024-1708",
+        "https://www.trendmicro.com/en_us/research/24/b/threat-actor-groups-including-black-basta-are-exploiting-recent-.html"
+      ],
+      "author": "Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems), @Kostastsale",
+      "date": "2022-02-25",
+      "modified": "2024-02-28",
+      "tags": [
+        "attack.command-and-control",
+        "attack.t1219"
+      ],
+      "logsource": {
+        "product": "windows",
+        "category": "process_creation"
+      },
+      "detection": {
+        "selection": {
+          "ParentCommandLine|contains|all": [
+            ":\\Windows\\TEMP\\ScreenConnect\\",
+            "run.cmd"
+          ],
+          "Image|endswith": [
+            "\\bitsadmin.exe",
+            "\\cmd.exe",
+            "\\curl.exe",
+            "\\dllhost.exe",
+            "\\net.exe",
+            "\\nltest.exe",
+            "\\powershell.exe",
+            "\\pwsh.exe",
+            "\\rundll32.exe",
+            "\\wevtutil.exe"
+          ]
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "If the script being executed make use of any of the utilities mentioned in the detection then they should filtered out or allowed."
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_remote_access_tools_screenconnect_remote_execution_susp.yml"
+  },
+  "26": {
+    "url": "https://web.archive.org/web/20180331144337/https://www.fireeye.com/blog/threat-research/2018/03/sanny-malware-delivery-method-updated-in-recently-observed-attacks.html",
+    "markdown": "# SANNY Malware Delivery Method Updated in Recently Observed Attacks **March 23, 2018** ### Introduction In the third week of March 2018, through FireEye’s Dynamic Threat Intelligence, FireEye discovered malicious macro-based Microsoft Word documents distributing SANNY malware to multiple governments worldwide. Each malicious document lure was crafted in regard to relevant regional geopolitical issues. FireEye has tracked the SANNY malware family since 2012 and believes that it is unique to a group focused on Korean Peninsula issues. This group has consistently targeted diplomatic entities worldwide, primarily using lure documents written in English and Russian. As part of these recently observed",
+    "sigma_rule": {
+      "title": "Cab File Extraction Via Wusa.EXE From Potentially Suspicious Paths",
+      "id": "c74c0390-3e20-41fd-a69a-128f0275a5ea",
+      "related": [
+        {
+          "id": "59b39960-5f9d-4a49-9cef-1e4d2c1d0cb9",
+          "type": "derived"
+        }
+      ],
+      "status": "test",
+      "description": "Detects the execution of the \"wusa.exe\" (Windows Update Standalone Installer) utility to extract \".cab\" files using the \"/extract\" argument from potentially suspicious paths.\n",
+      "references": [
+        "https://web.archive.org/web/20180331144337/https://www.fireeye.com/blog/threat-research/2018/03/sanny-malware-delivery-method-updated-in-recently-observed-attacks.html",
+        "https://www.echotrail.io/insights/search/wusa.exe/"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2022-08-05",
+      "modified": "2023-11-28",
+      "tags": [
+        "attack.execution"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_root": {
+          "Image|endswith": "\\wusa.exe",
+          "CommandLine|contains": "/extract:"
+        },
+        "selection_paths": {
+          "CommandLine|contains": [
+            ":\\PerfLogs\\",
+            ":\\Users\\Public\\",
+            ":\\Windows\\Temp\\",
+            "\\Appdata\\Local\\Temp\\"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_wusa_cab_files_extraction_from_susp_paths.yml"
+  },
+  "27": {
+    "url": "https://unit42.paloaltonetworks.com/emissary-trojan-changelog-did-operation-lotus-blossom-cause-it-to-evolve/",
+    "markdown": "",
+    "sigma_rule": {
+      "title": "Gpresult Display Group Policy Information",
+      "id": "e56d3073-83ff-4021-90fe-c658e0709e72",
+      "status": "test",
+      "description": "Detects cases in which a user uses the built-in Windows utility gpresult to display the Resultant Set of Policy (RSoP) information",
+      "references": [
+        "https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1615/T1615.md",
+        "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/gpresult",
+        "https://unit42.paloaltonetworks.com/emissary-trojan-changelog-did-operation-lotus-blossom-cause-it-to-evolve/",
+        "https://www.welivesecurity.com/wp-content/uploads/2020/05/ESET_Turla_ComRAT.pdf"
+      ],
+      "author": "frack113",
+      "date": "2022-05-01",
+      "tags": [
+        "attack.discovery",
+        "attack.t1615"
+      ],
+      "logsource": {
+        "product": "windows",
+        "category": "process_creation"
+      },
+      "detection": {
+        "selection": {
+          "Image|endswith": "\\gpresult.exe",
+          "CommandLine|contains": [
+            "/z",
+            "/v"
+          ]
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_gpresult_execution.yml"
+  },
+  "28": {
+    "url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4794",
+    "markdown": "# 4794(S, F): An attempt was made to set the Directory Services Restore Mode administrator password. **Article** **Date:** 09/07/2021 ```image Alt: Event 4794 illustration Description: | The image displays a Windows Event Properties window for Event ID 4794, which documents an attempt to set the Directory Services Restore Mode administrator password. The window is divided into sections providing detailed information: - The 'General' section summarizes the event, including the Security ID (CONTOSO\\dadmin), Account Name (dadmin), Account Domain (CONTOSO), and Logon ID (0x36F67). - The 'Additional Information' section lists the Caller Workstation (DC01) and the Status Code (0x0). - At the",
+    "sigma_rule": {
+      "title": "Password Change on Directory Service Restore Mode (DSRM) Account",
+      "id": "53ad8e36-f573-46bf-97e4-15ba5bf4bb51",
+      "related": [
+        {
+          "id": "b61e87c0-50db-4b2e-8986-6a2be94b33b0",
+          "type": "similar"
+        }
+      ],
+      "status": "stable",
+      "description": "Detects potential attempts made to set the Directory Services Restore Mode administrator password.\nThe Directory Service Restore Mode (DSRM) account is a local administrator account on Domain Controllers.\nAttackers may change the password in order to obtain persistence.\n",
+      "references": [
+        "https://adsecurity.org/?p=1714",
+        "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4794"
+      ],
+      "author": "Thomas Patzke",
+      "date": "2017-02-19",
+      "modified": "2020-08-23",
+      "tags": [
+        "attack.persistence",
+        "attack.t1098"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "security"
+      },
+      "detection": {
+        "selection": {
+          "EventID": 4794
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Initial installation of a domain controller."
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\security\\win_security_susp_dsrm_password_change.yml"
+  },
+  "29": {
+    "url": "https://www.cobaltstrike.com/help-windows-executable",
+    "markdown": "# User-driven Attack Packages The best attacks are not exploits. Rather, the best attacks take advantage of normal features to get code execution. **Cobalt Strike** makes it easy to setup several user-driven attacks. These attacks take advantage of listeners you’ve already setup. Navigate in the menu to **Payloads** and choose one of the following options. ## HTML Application An HTML Application is a Windows program written in HTML and an Internet Explorer supported scripting language. This package generates an HTML Application that runs a **Cobalt Strike** listener. Navigate to **Payloads -> HTML Application**. [Image Details: **Alt Text**: HTML Application Attack",
+    "sigma_rule": {
+      "title": "CobaltStrike Load by Rundll32",
+      "id": "ae9c6a7c-9521-42a6-915e-5aaa8689d529",
+      "status": "test",
+      "description": "Rundll32 can be use by Cobalt Strike with StartW function to load DLLs from the command line.",
+      "references": [
+        "https://www.cobaltstrike.com/help-windows-executable",
+        "https://redcanary.com/threat-detection-report/",
+        "https://thedfirreport.com/2020/10/18/ryuk-in-5-hours/"
+      ],
+      "author": "Wojciech Lesicki",
+      "date": "2021-06-01",
+      "modified": "2022-09-16",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1218.011"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_rundll": [
+          {
+            "Image|endswith": "\\rundll32.exe"
+          },
+          {
+            "OriginalFileName": "RUNDLL32.EXE"
+          },
+          {
+            "CommandLine|contains": [
+              "rundll32.exe",
+              "rundll32 "
+            ]
+          }
+        ],
+        "selection_params": {
+          "CommandLine|contains": ".dll",
+          "CommandLine|endswith": [
+            " StartW",
+            ",StartW"
+          ]
+        },
+        "condition": "all of selection*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_hktl_cobaltstrike_load_by_rundll32.yml"
+  },
+  "30": {
+    "url": "https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/sites/sitedefaults/logfile/",
+    "markdown": "# Default Log File Settings for Web Sites <logFile> ## Overview The `<logFile>` element of the `<siteDefaults>` element contains attributes that allow you to configure default logging for a site on IIS 7 and later. For example, you can enable or disable logging, configure the format of the IIS log file, specify the categories of information to store in the log file, and change the directory where the log file is stored. You can also use the `<logFile>` element to control how often IIS creates a new log file based either on log file size or time interval and the",
+    "sigma_rule": {
+      "title": "ETW Logging/Processing Option Disabled On IIS Server",
+      "id": "a5b40a90-baf5-4bf7-a6f7-373494881d22",
+      "status": "experimental",
+      "description": "Detects changes to of the IIS server configuration in order to disable/remove the ETW logging/processing option.",
+      "references": [
+        "https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis",
+        "https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/",
+        "https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/sites/sitedefaults/logfile/"
+      ],
+      "author": "frack113, Nasreddine Bencherchali",
+      "date": "2024-10-06",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1562.002",
+        "attack.t1505.004"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "iis-configuration"
+      },
+      "detection": {
+        "selection": {
+          "EventID": 29,
+          "Configuration|endswith": "@logTargetW3C",
+          "OldValue|contains": "ETW"
+        },
+        "filter_main_etw_added": {
+          "NewValue|contains": "ETW"
+        },
+        "condition": "selection and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Legitimate administrator activity"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\iis-configuration\\win_iis_logging_etw_disabled.yml"
+  },
+  "31": {
+    "url": "https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/",
+    "markdown": "# Inside Malicious Windows Apps for Malware Deployment **Date:** July 14, 2022 This article discusses Windows Apps – Windows applications packaged into *APPX* or *MSIX* packages – as a medium to deploy malware. Though not as widely abused as other infection vectors, there have been a number of recent high profile attacks that use Windows Apps. - **November, 2021:** BazarBackdoor was distributed in the form of an *APPX* package. - **December, 2021:** Emotet malware was distributed by abusing a spoofing vulnerability in the Windows App Installer, software that installs Windows Apps. - **January, 2022:** Malicious Windows Apps in *APPX* format",
+    "sigma_rule": {
+      "title": "Suspicious Remote AppX Package Locations",
+      "id": "8b48ad89-10d8-4382-a546-50588c410f0d",
+      "status": "experimental",
+      "description": "Detects an appx package added to the pipeline of the \"to be processed\" packages which was downloaded from a suspicious domain.\n",
+      "references": [
+        "Internal Research",
+        "https://www.sentinelone.com/labs/inside-malicious-windows-apps-for-malware-deployment/",
+        "https://learn.microsoft.com/en-us/windows/win32/appxpkg/troubleshooting",
+        "https://news.sophos.com/en-us/2021/11/11/bazarloader-call-me-back-attack-abuses-windows-10-apps-mechanism/"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2023-01-11",
+      "modified": "2024-08-22",
+      "tags": [
+        "attack.defense-evasion"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "appxdeployment-server"
+      },
+      "detection": {
+        "selection": {
+          "EventID": 854,
+          "Path|contains": [
+            ".githubusercontent.com",
+            "anonfiles.com",
+            "cdn.discordapp.com",
+            "ddns.net",
+            "dl.dropboxusercontent.com",
+            "ghostbin.co",
+            "glitch.me",
+            "gofile.io",
+            "hastebin.com",
+            "mediafire.com",
+            "mega.nz",
+            "onrender.com",
+            "pages.dev",
+            "paste.ee",
+            "pastebin.com",
+            "pastebin.pl",
+            "pastetext.net",
+            "privatlab.com",
+            "privatlab.net",
+            "send.exploit.in",
+            "sendspace.com",
+            "storage.googleapis.com",
+            "storjshare.io",
+            "supabase.co",
+            "temp.sh",
+            "transfer.sh",
+            "trycloudflare.com",
+            "ufile.io",
+            "w3spaces.com",
+            "workers.dev"
+          ]
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\appxdeployment_server\\win_appxdeployment_server_susp_domains.yml"
+  },
+  "32": {
+    "url": "https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/",
+    "markdown": "# SELECT XMRig FROM SQLServer **Categories:** coinminer, exploit **Published Date:** July 11, 2022 --- In March 2022, we observed an intrusion on a public-facing Microsoft SQL Server. The end goal of this intrusion was to deploy a coin miner. Although deploying a coin miner on a vulnerable server after successful exploitation is a common objective for threat actors, this intrusion was slightly different and therefore more interesting. US CERT recently published a malware analysis report related to XMRig coin miner on 23rd June 2022 (link) and a security tip for defending against this threat (link). --- ## Summary Over the",
+    "sigma_rule": {
+      "title": "Base64 MZ Header In CommandLine",
+      "id": "22e58743-4ac8-4a9f-bf19-00a0428d8c5f",
+      "status": "test",
+      "description": "Detects encoded base64 MZ header in the commandline",
+      "references": [
+        "https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2022-07-12",
+      "tags": [
+        "attack.execution"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "CommandLine|contains": [
+            "TVqQAAMAAAAEAAAA",
+            "TVpQAAIAAAAEAA8A",
+            "TVqAAAEAAAAEABAA",
+            "TVoAAAAAAAAAAAAA",
+            "TVpTAQEAAAAEAAAA"
+          ]
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Unlikely"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_susp_inline_base64_mz_header.yml"
+  },
+  "33": {
+    "url": "https://redcanary.com/blog/chromeloader/",
+    "markdown": "# ChromeLoader: a pushy malvertiser **ChromeLoader might seem like a run-of-the-mill browser hijacker, but its peculiar use of PowerShell could spell deeper trouble.** **Originally published:** May 25, 2022. Last modified April 30, 2024. --- *Editor’s note: We’ve been researching this threat since early February. In recent days, we’ve observed what appears to be a resurgence in ChromeLoader activity. As a result, this research is based on analysis of threats spanning almost five months. That said, the detection guidance in this report provides defense-in-depth against ChromeLoader and a wide array of other threats.* ChromeLoader is a pervasive and persistent browser hijacker",
+    "sigma_rule": {
+      "title": "Suspicious Chromium Browser Instance Executed With Custom Extension",
+      "id": "27ba3207-dd30-4812-abbf-5d20c57d474e",
+      "related": [
+        {
+          "id": "88d6e60c-759d-4ac1-a447-c0f1466c2d21",
+          "type": "similar"
+        }
+      ],
+      "status": "test",
+      "description": "Detects a suspicious process spawning a Chromium based browser process with the 'load-extension' flag to start an instance with a custom extension",
+      "references": [
+        "https://redcanary.com/blog/chromeloader/",
+        "https://emkc.org/s/RJjuLa",
+        "https://www.mandiant.com/resources/blog/lnk-between-browsers"
+      ],
+      "author": "Aedan Russell, frack113, X__Junior (Nextron Systems)",
+      "date": "2022-06-19",
+      "modified": "2023-11-28",
+      "tags": [
+        "attack.persistence",
+        "attack.t1176"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "ParentImage|endswith": [
+            "\\cmd.exe",
+            "\\cscript.exe",
+            "\\mshta.exe",
+            "\\powershell.exe",
+            "\\pwsh.exe",
+            "\\regsvr32.exe",
+            "\\rundll32.exe",
+            "\\wscript.exe"
+          ],
+          "Image|endswith": [
+            "\\brave.exe",
+            "\\chrome.exe",
+            "\\msedge.exe",
+            "\\opera.exe",
+            "\\vivaldi.exe"
+          ],
+          "CommandLine|contains": "--load-extension="
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_browsers_chromium_susp_load_extension.yml"
+  },
+  "34": {
+    "url": "https://www.hexacorn.com/blog/2013/09/19/beyond-good-ol-run-key-part-4/",
+    "markdown": "# Beyond good ol’ Run key, Part 4 Posted on 2013-09-19 Last three articles about various startup/autostart methods covered a lot of different well- and less-known techniques for ‘staying alive’. Many of them are actively used by malware and ‘normal’ software; some are just ideas that are worth describing because… luck favors a prepared mind. If you haven’t read them previously, you can do so by visiting these links: Part 1, Part 2, Part 3. In today’s post I will cover some more techniques including hijacking of various debuggers and some more obscure ways of ‘survival’. I think this is",
+    "sigma_rule": {
+      "title": "Potential Registry Persistence Attempt Via DbgManagedDebugger",
+      "id": "9827ae57-3802-418f-994b-d5ecf5cd974b",
+      "status": "test",
+      "description": "Detects the addition of the \"Debugger\" value to the \"DbgManagedDebugger\" key in order to achieve persistence. Which will get invoked when an application crashes",
+      "references": [
+        "https://www.hexacorn.com/blog/2013/09/19/beyond-good-ol-run-key-part-4/",
+        "https://github.com/last-byte/PersistenceSniper"
+      ],
+      "author": "frack113",
+      "date": "2022-08-07",
+      "modified": "2023-08-17",
+      "tags": [
+        "attack.persistence",
+        "attack.t1574"
+      ],
+      "logsource": {
+        "category": "registry_set",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "TargetObject|endswith": "\\Microsoft\\.NETFramework\\DbgManagedDebugger"
+        },
+        "filter": {
+          "Details": "\"C:\\Windows\\system32\\vsjitdebugger.exe\" PID %d APPDOM %d EXTEXT \"%s\" EVTHDL %d"
+        },
+        "condition": "selection and not filter"
+      },
+      "falsepositives": [
+        "Legitimate use of the key to setup a debugger. Which is often the case on developers machines"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\registry\\registry_set\\registry_set_dbgmanageddebugger_persistence.yml"
+  },
+  "35": {
+    "url": "https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/",
+    "markdown": "# SELECT XMRig FROM SQLServer **Categories:** coinminer, exploit **Published Date:** July 11, 2022 --- In March 2022, we observed an intrusion on a public-facing Microsoft SQL Server. The end goal of this intrusion was to deploy a coin miner. Although deploying a coin miner on a vulnerable server after successful exploitation is a common objective for threat actors, this intrusion was slightly different and therefore more interesting. US CERT recently published a malware analysis report related to XMRig coin miner on 23rd June 2022 (link) and a security tip for defending against this threat (link). --- ## Summary Over the",
+    "sigma_rule": {
+      "title": "Potential Suspicious Mofcomp Execution",
+      "id": "1dd05363-104e-4b4a-b963-196a534b03a1",
+      "status": "test",
+      "description": "Detects execution of the \"mofcomp\" utility as a child of a suspicious shell or script running utility or by having a suspicious path in the commandline.\nThe \"mofcomp\" utility parses a file containing MOF statements and adds the classes and class instances defined in the file to the WMI repository.\nAttackers abuse this utility to install malicious MOF scripts\n",
+      "references": [
+        "https://thedfirreport.com/2022/07/11/select-xmrig-from-sqlserver/",
+        "https://github.com/The-DFIR-Report/Sigma-Rules/blob/75260568a7ffe61b2458ca05f6f25914efb44337/win_mofcomp_execution.yml",
+        "https://learn.microsoft.com/en-us/windows/win32/wmisdk/mofcomp"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2022-07-12",
+      "modified": "2023-04-11",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1218"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\mofcomp.exe"
+          },
+          {
+            "OriginalFileName": "mofcomp.exe"
+          }
+        ],
+        "selection_case": [
+          {
+            "ParentImage|endswith": [
+              "\\cmd.exe",
+              "\\powershell.exe",
+              "\\pwsh.exe",
+              "\\wsl.exe",
+              "\\wscript.exe",
+              "\\cscript.exe"
+            ]
+          },
+          {
+            "CommandLine|contains": [
+              "\\AppData\\Local\\Temp",
+              "\\Users\\Public\\",
+              "\\WINDOWS\\Temp\\",
+              "%temp%",
+              "%tmp%",
+              "%appdata%"
+            ]
+          }
+        ],
+        "filter_main_wmiprvse": {
+          "ParentImage": "C:\\Windows\\System32\\wbem\\WmiPrvSE.exe",
+          "CommandLine|contains": "C:\\Windows\\TEMP\\",
+          "CommandLine|endswith": ".mof"
+        },
+        "filter_optional_null_parent": {
+          "CommandLine|contains": "C:\\Windows\\TEMP\\",
+          "CommandLine|endswith": ".mof"
+        },
+        "condition": "all of selection_* and not 1 of filter_main_* and not 1 of filter_optional_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_mofcomp_execution.yml"
+  },
+  "36": {
+    "url": "https://redcanary.com/blog/threat-detection/misbehaving-rats/",
+    "markdown": "# Remote access tool or trojan? How to detect misbehaving RATs The only difference between a remote administration tool and a remote access trojan (RAT) is who’s controlling it. Originally published: August 19, 2021. Last modified: October 1, 2024. --- Red Canary’s Cyber Incident Response Team frequently observes adversaries abusing legitimate remote access utilities for lateral movement and execution of payloads. These tools perform reliably, as you may expect with most enterprise software, and allow operators to pivot and transfer data to and from victim machines. Adversarial abuse of remote monitoring & management (RMM) software is not new, but—given the",
+    "sigma_rule": {
+      "title": "Remote Access Tool Services Have Been Installed - Security",
+      "id": "c8b00925-926c-47e3-beea-298fd563728e",
+      "related": [
+        {
+          "id": "1a31b18a-f00c-4061-9900-f735b96c99fc",
+          "type": "similar"
+        }
+      ],
+      "status": "test",
+      "description": "Detects service installation of different remote access tools software. These software are often abused by threat actors to perform",
+      "references": [
+        "https://redcanary.com/blog/threat-detection/misbehaving-rats/"
+      ],
+      "author": "Connor Martin, Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2022-12-23",
+      "modified": "2024-12-07",
+      "tags": [
+        "attack.persistence",
+        "attack.t1543.003",
+        "attack.t1569.002"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "security",
+        "definition": "The 'System Security Extension' audit subcategory need to be enabled to log the EID 4697"
+      },
+      "detection": {
+        "selection": {
+          "EventID": 4697,
+          "ServiceName|contains": [
+            "AmmyyAdmin",
+            "AnyDesk",
+            "Atera",
+            "BASupportExpressSrvcUpdater",
+            "BASupportExpressStandaloneService",
+            "chromoting",
+            "GoToAssist",
+            "GoToMyPC",
+            "jumpcloud",
+            "LMIGuardianSvc",
+            "LogMeIn",
+            "monblanking",
+            "Parsec",
+            "RManService",
+            "RPCPerformanceService",
+            "RPCService",
+            "SplashtopRemoteService",
+            "SSUService",
+            "TeamViewer",
+            "TightVNC",
+            "vncserver",
+            "Zoho"
+          ]
+        },
+        "condition": "selection"
+      },
+      "falsepositives": [
+        "The rule doesn't look for anything suspicious so false positives are expected. If you use one of the tools mentioned, comment it out"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\security\\win_security_service_install_remote_access_software.yml"
+  },
+  "37": {
+    "url": "https://twitter.com/vxunderground/status/1423336151860002816",
+    "markdown": "# Post Aug 5, 2021 A \"pentester\" for Conti has leaked \"pentester manuals and software\" online. These files are allegedly given to affiliates vxug.fakedoma[.]in/tmp/ - Link modified, Twitters banned our domains - Some files password protected, we do not know the password - Images from XSS ```image Alt: Image 1 Description: The image displays a group of screenshots that seem to be part of a communication or discussion regarding penetration testing related to the Conti ransomware group. The screenshots include dialogues and messages that refer to connections to specific servers, password prompts, and operational details associated with the Conti group.",
+    "sigma_rule": {
+      "title": "Esentutl Gather Credentials",
+      "id": "7df1713a-1a5b-4a4b-a071-dc83b144a101",
+      "status": "test",
+      "description": "Conti recommendation to its affiliates to use esentutl to access NTDS dumped file. Trickbot also uses this utilities to get MSEdge info via its module pwgrab.",
+      "references": [
+        "https://twitter.com/vxunderground/status/1423336151860002816",
+        "https://attack.mitre.org/software/S0404/",
+        "https://thedfirreport.com/2021/08/01/bazarcall-to-conti-ransomware-via-trickbot-and-cobalt-strike/"
+      ],
+      "author": "sam0x90",
+      "date": "2021-08-06",
+      "modified": "2022-10-09",
+      "tags": [
+        "attack.credential-access",
+        "attack.t1003",
+        "attack.t1003.003"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "CommandLine|contains|all": [
+            "esentutl",
+            " /p"
+          ]
+        },
+        "condition": "selection"
+      },
+      "fields": [
+        "User",
+        "CommandLine",
+        "ParentCommandLine",
+        "CurrentDirectory"
+      ],
+      "falsepositives": [
+        "To be determined"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_esentutl_params.yml"
+  },
+  "38": {
+    "url": "https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/cicada-apt10-japan-espionage",
+    "markdown": "# Japan-Linked Organizations Targeted in Long-Running and Sophisticated Attack Campaign **Posted:** 17 Nov, 2020 **Category:** Threat Intelligence --- ## Evidence that advanced persistent threat group Cicada is behind attack campaign targeting companies in 17 regions and multiple sectors. A large-scale attack campaign is targeting multiple Japanese companies, including subsidiaries located in as many as 17 regions around the globe in a likely intelligence-gathering operation. Companies in multiple sectors are targeted in this campaign, including those operating in the automotive, pharmaceutical, and engineering sectors, as well as managed service providers (MSPs). The scale and sophistication of this attack campaign indicate that",
+    "sigma_rule": {
+      "title": "Compressed File Creation Via Tar.EXE",
+      "id": "418a3163-3247-4b7b-9933-dcfcb7c52ea9",
+      "status": "test",
+      "description": "Detects execution of \"tar.exe\" in order to create a compressed file.\nAdversaries may abuse various utilities to compress or encrypt data before exfiltration.\n",
+      "references": [
+        "https://unit42.paloaltonetworks.com/chromeloader-malware/",
+        "https://lolbas-project.github.io/lolbas/Binaries/Tar/",
+        "https://symantec-enterprise-blogs.security.com/blogs/threat-intelligence/cicada-apt10-japan-espionage"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems), AdmU3",
+      "date": "2023-12-19",
+      "tags": [
+        "attack.collection",
+        "attack.exfiltration",
+        "attack.t1560",
+        "attack.t1560.001"
+      ],
+      "logsource": {
+        "product": "windows",
+        "category": "process_creation"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\tar.exe"
+          },
+          {
+            "OriginalFileName": "bsdtar"
+          }
+        ],
+        "selection_create": {
+          "CommandLine|contains": [
+            "-c",
+            "-r",
+            "-u"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Likely"
+      ],
+      "level": "low"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_tar_compression.yml"
+  },
+  "39": {
+    "url": "https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/",
+    "markdown": "# IIS modules: The evolution of web shells and how to detect them **December 12, 2022** --- The Microsoft Detection and Response Team (DART) has been renamed to Microsoft Incident Response (Microsoft IR). For more information on IR services, go to Microsoft Incident Response. Web exploitation and web shells are some of the most common entry points in the current threat landscape. Web servers provide an external avenue directly into your corporate network, which often results in web servers being an initial intrusion vector or mechanism of persistence. Monitoring for exploitation and web shells should be a high priority for",
+    "sigma_rule": {
+      "title": "New Module Module Added To IIS Server",
+      "id": "dd857d3e-0c6e-457b-9b48-e82ae7f86bd7",
+      "status": "experimental",
+      "description": "Detects the addition of a new module to an IIS server.",
+      "references": [
+        "https://learn.microsoft.com/en-us/iis/manage/provisioning-and-managing-iis/configure-logging-in-iis",
+        "https://www.microsoft.com/en-us/security/blog/2022/12/12/iis-modules-the-evolution-of-web-shells-and-how-to-detect-them/",
+        "https://www.microsoft.com/en-us/security/blog/2022/07/26/malicious-iis-extensions-quietly-open-persistent-backdoors-into-servers/",
+        "https://learn.microsoft.com/en-us/iis/get-started/introduction-to-iis/iis-modules-overview"
+      ],
+      "author": "frack113",
+      "date": "2024-10-06",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.persistence",
+        "attack.t1562.002",
+        "attack.t1505.004"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "iis-configuration"
+      },
+      "detection": {
+        "selection": {
+          "EventID": 29,
+          "Configuration|contains": "/system.webServer/modules/add"
+        },
+        "filter_main_builtin": {
+          "NewValue": [
+            "AnonymousAuthenticationModule",
+            "CustomErrorModule",
+            "DefaultDocumentModule",
+            "DirectoryListingModule",
+            "FileCacheModule",
+            "HttpCacheModule",
+            "HttpLoggingModule",
+            "ProtocolSupportModule",
+            "RequestFilteringModule",
+            "StaticCompressionModule",
+            "StaticFileModule",
+            "TokenCacheModule",
+            "UriCacheModule"
+          ]
+        },
+        "filter_main_remove": {
+          "NewValue": ""
+        },
+        "condition": "selection and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Legitimate administrator activity"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\iis-configuration\\win_iis_module_added.yml"
+  },
+  "40": {
+    "url": "https://www.qemu.org/docs/master/system/invocation.html#hxtool-5",
+    "markdown": "",
+    "sigma_rule": {
+      "title": "Potentially Suspicious Usage Of Qemu",
+      "id": "5fc297ae-25b6-488a-8f25-cc12ac29b744",
+      "status": "test",
+      "description": "Detects potentially suspicious execution of the Qemu utility in a Windows environment.\nThreat actors have leveraged this utility and this technique for achieving network access as reported by Kaspersky.\n",
+      "references": [
+        "https://securelist.com/network-tunneling-with-qemu/111803/",
+        "https://www.qemu.org/docs/master/system/invocation.html#hxtool-5"
+      ],
+      "author": "Muhammad Faisal (@faisalusuf), Hunter Juhan (@threatHNTR)",
+      "date": "2024-06-03",
+      "tags": [
+        "attack.command-and-control",
+        "attack.t1090",
+        "attack.t1572"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "CommandLine|contains": [
+            "-m 1M",
+            "-m 2M",
+            "-m 3M"
+          ],
+          "CommandLine|contains|all": [
+            "restrict=off",
+            "-netdev ",
+            "connect=",
+            "-nographic"
+          ]
+        },
+        "filter_main_normal_usecase": {
+          "CommandLine|contains": [
+            " -cdrom ",
+            " type=virt ",
+            " -blockdev "
+          ]
+        },
+        "condition": "selection and not 1 of filter_main_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_qemu_suspicious_execution.yml"
+  },
+  "41": {
+    "url": "https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md#atomic-test-26---disable-windows-defender-with-dism",
+    "markdown": "",
+    "sigma_rule": {
+      "title": "Dism Remove Online Package",
+      "id": "43e32da2-fdd0-4156-90de-50dfd62636f9",
+      "status": "test",
+      "description": "Deployment Image Servicing and Management tool. DISM is used to enumerate, install, uninstall, configure, and update features and packages in Windows images",
+      "references": [
+        "https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.001/T1562.001.md#atomic-test-26---disable-windows-defender-with-dism",
+        "https://www.trendmicro.com/en_us/research/22/h/ransomware-actor-abuses-genshin-impact-anti-cheat-driver-to-kill-antivirus.html"
+      ],
+      "author": "frack113",
+      "date": "2022-01-16",
+      "modified": "2022-08-26",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1562.001"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_dismhost": {
+          "Image|endswith": "\\DismHost.exe",
+          "ParentCommandLine|contains|all": [
+            "/Online",
+            "/Disable-Feature"
+          ]
+        },
+        "selection_dism": {
+          "Image|endswith": "\\Dism.exe",
+          "CommandLine|contains|all": [
+            "/Online",
+            "/Disable-Feature"
+          ]
+        },
+        "condition": "1 of selection_*"
+      },
+      "falsepositives": [
+        "Legitimate script"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_dism_remove.yml"
+  },
+  "42": {
+    "url": "https://twitter.com/nas_bench/status/1534957360032120833",
+    "markdown": "# Post Jun 9, 2022 In the background, this is basically using \"cdb.exe\" with a debugging script. LOLBAS doesn't seem to have this one documented for cdb (https://lolbas-project.github.io/lolbas/OtherMSBinaries/Cdb/) so here it is. ``` cdb.exe -c $\"[PathToDebuggingScript]\" [Command] ``` ## Post Jun 9, 2022 We know from LOLBAS that adplus can be used to dump lsass (https://lolbas-project.github.io/lolbas/OtherMSBinaries/Adplus/). But you can also use it to run arbitrary commands and binaries with the \"-sc\" flag. #lolbin #lolbas ``` adplus.exe -crash -o [OutputDir] -sc [Command] ``` ## Comment Jun 9, 2022 The easiest way to get a copy of this script is to run",
+    "sigma_rule": {
+      "title": "Potential Binary Proxy Execution Via Cdb.EXE",
+      "id": "b5c7395f-e501-4a08-94d4-57fe7a9da9d2",
+      "status": "test",
+      "description": "Detects usage of \"cdb.exe\" to launch arbitrary processes or commands from a debugger script file",
+      "references": [
+        "https://lolbas-project.github.io/lolbas/OtherMSBinaries/Cdb/",
+        "https://web.archive.org/web/20170715043507/http://www.exploit-monday.com/2016/08/windbg-cdb-shellcode-runner.html",
+        "https://twitter.com/nas_bench/status/1534957360032120833"
+      ],
+      "author": "Beyu Denis, oscd.community, Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2019-10-26",
+      "modified": "2024-04-22",
+      "tags": [
+        "attack.execution",
+        "attack.t1106",
+        "attack.defense-evasion",
+        "attack.t1218",
+        "attack.t1127"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": "\\cdb.exe"
+          },
+          {
+            "OriginalFileName": "CDB.Exe"
+          }
+        ],
+        "selection_cli": {
+          "CommandLine|contains": [
+            " -c ",
+            " -cf "
+          ]
+        },
+        "condition": "all of selection*"
+      },
+      "falsepositives": [
+        "Legitimate use of debugging tools"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_cdb_arbitrary_command_execution.yml"
+  },
+  "43": {
+    "url": "https://github.com/SigmaHQ/sigma/issues/1009",
+    "markdown": "",
+    "sigma_rule": {
+      "title": "Suspicious ShellExec_RunDLL Call Via Ordinal",
+      "id": "8823e85d-31d8-473e-b7f4-92da070f0fc6",
+      "related": [
+        {
+          "id": "d87bd452-6da1-456e-8155-7dc988157b7d",
+          "type": "derived"
+        }
+      ],
+      "status": "experimental",
+      "description": "Detects suspicious call to the \"ShellExec_RunDLL\" exported function of SHELL32.DLL through the ordinal number to launch other commands.\nAdversary might only use the ordinal number in order to bypass existing detection that alert on usage of ShellExec_RunDLL on CommandLine.\n",
+      "references": [
+        "https://redcanary.com/blog/threat-intelligence/raspberry-robin/",
+        "https://www.microsoft.com/en-us/security/blog/2022/10/27/raspberry-robin-worm-part-of-larger-ecosystem-facilitating-pre-ransomware-activity/",
+        "https://github.com/SigmaHQ/sigma/issues/1009",
+        "https://strontic.github.io/xcyclopedia/library/shell32.dll-65DA072F25DE83D9F83653E3FEA3644D.html"
+      ],
+      "author": "Swachchhanda Shrawan Poudel",
+      "date": "2024-12-01",
+      "tags": [
+        "attack.defense-evasion",
+        "attack.t1218.011"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_parent_img": {
+          "ParentCommandLine|contains": "SHELL32.DLL"
+        },
+        "selection_parent_ordinal": {
+          "ParentCommandLine|contains": [
+            "#568",
+            "#570",
+            "#572",
+            "#576"
+          ]
+        },
+        "selection_susp_cli_parent": [
+          {
+            "ParentCommandLine|contains": [
+              "comspec",
+              "iex",
+              "Invoke-",
+              "msiexec",
+              "odbcconf",
+              "regsvr32"
+            ]
+          },
+          {
+            "ParentCommandLine|contains": [
+              "\\Desktop\\",
+              "\\ProgramData\\",
+              "\\Temp\\",
+              "\\Users\\Public\\"
+            ]
+          }
+        ],
+        "selection_susp_child_img": {
+          "Image|endswith": [
+            "\\bash.exe",
+            "\\bitsadmin.exe",
+            "\\cmd.exe",
+            "\\cscript.exe",
+            "\\curl.exe",
+            "\\mshta.exe",
+            "\\msiexec.exe",
+            "\\msxsl.exe",
+            "\\odbcconf.exe",
+            "\\powershell.exe",
+            "\\pwsh.exe",
+            "\\regsvr32.exe",
+            "\\schtasks.exe",
+            "\\wmic.exe",
+            "\\wscript.exe"
+          ]
+        },
+        "condition": "all of selection_parent_* and 1 of selection_susp_*"
+      },
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_rundll32_susp_shellexec_ordinal_execution.yml"
+  },
+  "44": {
+    "url": "https://twitter.com/EricaZelic/status/1614075109827874817",
+    "markdown": "# Post Jan 14, 2023 My nightly Windows reading is never boring: ```image Description: The image is a webpage screenshot about \"PsLogList v2.81,\" a utility from a Resource Kit that enables the dumping of Event Log contents from both local and remote computers. It highlights that PsLogList is similar to elogdump but additionally allows access to remote systems beyond current security credentials. The page includes options for downloading PsTools and displays the publication details. Transcription: | **PsLogList v2.81** Article · 03/23/2021 · 2 minutes to read · 4 contributors By Mark Russinovich Published: March 05, 2019 Download PsTools (2.7 MB)",
+    "sigma_rule": {
+      "title": "Suspicious Use of PsLogList",
+      "id": "aae1243f-d8af-40d8-ab20-33fc6d0c55bc",
+      "status": "test",
+      "description": "Detects usage of the PsLogList utility to dump event log in order to extract admin accounts and perform account discovery or delete events logs",
+      "references": [
+        "https://web.archive.org/web/20231124132223/https://research.nccgroup.com/2021/01/12/abusing-cloud-services-to-fly-under-the-radar/",
+        "https://www.cybereason.com/blog/deadringer-exposing-chinese-threat-actors-targeting-major-telcos",
+        "https://github.com/3CORESec/MAL-CL/tree/master/Descriptors/Sysinternals/PsLogList",
+        "https://twitter.com/EricaZelic/status/1614075109827874817"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2021-12-18",
+      "modified": "2024-03-05",
+      "tags": [
+        "attack.discovery",
+        "attack.t1087",
+        "attack.t1087.001",
+        "attack.t1087.002"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "OriginalFileName": "psloglist.exe"
+          },
+          {
+            "Image|endswith": [
+              "\\psloglist.exe",
+              "\\psloglist64.exe"
+            ]
+          }
+        ],
+        "selection_cli_eventlog": {
+          "CommandLine|contains": [
+            " security",
+            " application",
+            " system"
+          ]
+        },
+        "selection_cli_flags": {
+          "CommandLine|contains|windash": [
+            " -d",
+            " -x",
+            " -s",
+            " -c",
+            " -g"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Another tool that uses the command line switches of PsLogList",
+        "Legitimate use of PsLogList by an administrator"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_sysinternals_psloglist.yml"
+  },
+  "45": {
+    "url": "https://thedfirreport.com/2021/08/01/bazarcall-to-conti-ransomware-via-trickbot-and-cobalt-strike/",
+    "markdown": "# BazarCall to Conti Ransomware via Trickbot and Cobalt Strike **Categories:** adfind BazarCall cobaltstrike conti ransomware trickbot **Published on:** August 1, 2021 ## Intro This report will go through an intrusion that went from an Excel file to domain-wide ransomware. The threat actors used BazarCall to install Trickbot in the environment, which downloaded and executed a Cobalt Strike Beacon. From there, the threat actor discovered the internal network before moving laterally to a domain controller for additional discovery. A couple of days later, the threat actors came back and executed Conti ransomware across the domain. Unfamiliar with BazaCall/BazarCall? Read more",
+    "sigma_rule": {
+      "title": "Esentutl Gather Credentials",
+      "id": "7df1713a-1a5b-4a4b-a071-dc83b144a101",
+      "status": "test",
+      "description": "Conti recommendation to its affiliates to use esentutl to access NTDS dumped file. Trickbot also uses this utilities to get MSEdge info via its module pwgrab.",
+      "references": [
+        "https://twitter.com/vxunderground/status/1423336151860002816",
+        "https://attack.mitre.org/software/S0404/",
+        "https://thedfirreport.com/2021/08/01/bazarcall-to-conti-ransomware-via-trickbot-and-cobalt-strike/"
+      ],
+      "author": "sam0x90",
+      "date": "2021-08-06",
+      "modified": "2022-10-09",
+      "tags": [
+        "attack.credential-access",
+        "attack.t1003",
+        "attack.t1003.003"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "CommandLine|contains|all": [
+            "esentutl",
+            " /p"
+          ]
+        },
+        "condition": "selection"
+      },
+      "fields": [
+        "User",
+        "CommandLine",
+        "ParentCommandLine",
+        "CurrentDirectory"
+      ],
+      "falsepositives": [
+        "To be determined"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_esentutl_params.yml"
+  },
+  "46": {
+    "url": "https://www.infosecmatter.com/crackmapexec-module-library/?cmem=mssql-mimikatz",
+    "markdown": "# CrackMapExec Mimikatz (mssql) This page contains detailed information about how to use the **mimikatz** CME module while using the **mssql** protocol. For a list of all CrackMapExec modules, visit the CrackMapExec Module Library. ## Description --- This module executes PowerSploit's `Invoke-Mimikatz.ps1` script (Mimikatz's DPAPI Module) and extracts cached credentials from memory from the LSASS subsystem. In essence, it executes `privilege::debug` and `sekurlsa::logonpasswords` Mimikatz commands. The mimikatz module is OPSEC safe. This means that it doesn't touch the disk and therefore shouldn't trigger any alarms. ## Supported Protocols --- - mssql - smb ## Module Source Code --- - https://github.com/byt3bl33d3r/CrackMapExec/tree/master/cme/modules/mimikatz.py",
+    "sigma_rule": {
+      "title": "HackTool - CrackMapExec Execution",
+      "id": "42a993dd-bb3e-48c8-b372-4d6684c4106c",
+      "status": "test",
+      "description": "This rule detect common flag combinations used by CrackMapExec in order to detect its use even if the binary has been replaced.",
+      "references": [
+        "https://web.archive.org/web/20220625234519/https://mpgn.gitbook.io/crackmapexec/smb-protocol/authentication/checking-credentials-local",
+        "https://www.mandiant.com/resources/telegram-malware-iranian-espionage",
+        "https://www.infosecmatter.com/crackmapexec-module-library/?cmem=mssql-mimikatz",
+        "https://www.infosecmatter.com/crackmapexec-module-library/?cmem=smb-pe_inject"
+      ],
+      "author": "Florian Roth (Nextron Systems)",
+      "date": "2022-02-25",
+      "modified": "2023-03-08",
+      "tags": [
+        "attack.execution",
+        "attack.persistence",
+        "attack.privilege-escalation",
+        "attack.credential-access",
+        "attack.discovery",
+        "attack.t1047",
+        "attack.t1053",
+        "attack.t1059.003",
+        "attack.t1059.001",
+        "attack.t1110",
+        "attack.t1201"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_binary": {
+          "Image|endswith": "\\crackmapexec.exe"
+        },
+        "selection_special": {
+          "CommandLine|contains": " -M pe_inject "
+        },
+        "selection_execute": {
+          "CommandLine|contains|all": [
+            " --local-auth",
+            " -u ",
+            " -x "
+          ]
+        },
+        "selection_hash": {
+          "CommandLine|contains|all": [
+            " --local-auth",
+            " -u ",
+            " -p ",
+            " -H 'NTHASH'"
+          ]
+        },
+        "selection_module_mssql": {
+          "CommandLine|contains|all": [
+            " mssql ",
+            " -u ",
+            " -p ",
+            " -M ",
+            " -d "
+          ]
+        },
+        "selection_module_smb1": {
+          "CommandLine|contains|all": [
+            " smb ",
+            " -u ",
+            " -H ",
+            " -M ",
+            " -o "
+          ]
+        },
+        "selection_module_smb2": {
+          "CommandLine|contains|all": [
+            " smb ",
+            " -u ",
+            " -p ",
+            " --local-auth"
+          ]
+        },
+        "part_localauth_1": {
+          "CommandLine|contains|all": [
+            " --local-auth",
+            " -u ",
+            " -p "
+          ]
+        },
+        "part_localauth_2": {
+          "CommandLine|contains|all": [
+            " 10.",
+            " 192.168.",
+            "/24 "
+          ]
+        },
+        "condition": "1 of selection_* or all of part_localauth*"
+      },
+      "fields": [
+        "ComputerName",
+        "User",
+        "CommandLine"
+      ],
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_hktl_crackmapexec_execution.yml"
+  },
+  "47": {
+    "url": "https://cloud.google.com/blog/topics/threat-intelligence/kegtap-and-singlemalt-with-a-ransomware-chaser/",
+    "markdown": "# Unhappy Hour Special: KEGTAP and SINGLEMALT With a Ransomware Chaser **October 28, 2020** --- Throughout 2020, ransomware activity has become increasingly prolific, relying on an ecosystem of distinct but co-enabling operations to gain access to targets of interest before conducting extortion. Mandiant Threat Intelligence has tracked several loader and backdoor campaigns that lead to the post-compromise deployment of ransomware, sometimes within 24 hours of initial compromise. Effective and fast detection of these campaigns is key to mitigating this threat. The malware families enabling these attacks previously reported by Mandiant to intelligence subscribers include KEGTAP/BEERBOT, SINGLEMALT/STILLBOT, and WINEKEY/CORKBOT. While these",
+    "sigma_rule": {
+      "title": "WINEKEY Registry Modification",
+      "id": "b98968aa-dbc0-4a9c-ac35-108363cbf8d5",
+      "status": "test",
+      "description": "Detects potential malicious modification of run keys by winekey or team9 backdoor",
+      "references": [
+        "https://cloud.google.com/blog/topics/threat-intelligence/kegtap-and-singlemalt-with-a-ransomware-chaser/"
+      ],
+      "author": "omkar72",
+      "date": "2020-10-30",
+      "modified": "2021-11-27",
+      "tags": [
+        "attack.persistence",
+        "attack.t1547"
+      ],
+      "logsource": {
+        "category": "registry_event",
+        "product": "windows"
+      },
+      "detection": {
+        "selection": {
+          "TargetObject|endswith": "Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Backup Mgr"
+        },
+        "condition": "selection"
+      },
+      "fields": [
+        "ComputerName",
+        "Image",
+        "EventType",
+        "TargetObject"
+      ],
+      "falsepositives": [
+        "Unknown"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\registry\\registry_event\\registry_event_runkey_winekey.yml"
+  },
+  "48": {
+    "url": "https://web.archive.org/web/20230329163438/https://blog.menasec.net/2019/02/threat-hunting-5-detecting-enumeration.html",
+    "markdown": "# Threat Hunting #5 - Detecting enumeration of users via Net.exe or Net1.exe utility Detecting an attacker during the reconnaissance phase is very important, because if he/she is at this stage, it means she/he already bypassed all your peripheral and endpoint standard security solutions. If you can detect and stop him at this stage then good for you! Microsoft Net.exe utility can be used to enumerate local and domain users and groups [a must to do for any attacker trying to get answers for who/where/what/etc. to complete the objectives]. Famous detection techniques for users enumeration with the net.exe utility are",
+    "sigma_rule": {
+      "title": "AD Privileged Users or Groups Reconnaissance",
+      "id": "35ba1d85-724d-42a3-889f-2e2362bcaf23",
+      "status": "test",
+      "description": "Detect priv users or groups recon based on 4661 eventid and known privileged users or groups SIDs",
+      "references": [
+        "https://web.archive.org/web/20230329163438/https://blog.menasec.net/2019/02/threat-hunting-5-detecting-enumeration.html"
+      ],
+      "author": "Samir Bousseaden",
+      "date": "2019-04-03",
+      "modified": "2022-07-13",
+      "tags": [
+        "attack.discovery",
+        "attack.t1087.002"
+      ],
+      "logsource": {
+        "product": "windows",
+        "service": "security",
+        "definition": "Requirements: enable Object Access SAM on your Domain Controllers"
+      },
+      "detection": {
+        "selection": {
+          "EventID": 4661,
+          "ObjectType": [
+            "SAM_USER",
+            "SAM_GROUP"
+          ]
+        },
+        "selection_object": [
+          {
+            "ObjectName|endswith": [
+              "-512",
+              "-502",
+              "-500",
+              "-505",
+              "-519",
+              "-520",
+              "-544",
+              "-551",
+              "-555"
+            ]
+          },
+          {
+            "ObjectName|contains": "admin"
+          }
+        ],
+        "filter": {
+          "SubjectUserName|endswith": "$"
+        },
+        "condition": "selection and selection_object and not filter"
+      },
+      "falsepositives": [
+        "If source account name is not an admin then its super suspicious"
+      ],
+      "level": "high"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\builtin\\security\\win_security_account_discovery.yml"
+  },
+  "49": {
+    "url": "https://www.cisa.gov/uscert/sites/default/files/publications/aa22-320a_joint_csa_iranian_government-sponsored_apt_actors_compromise_federal%20network_deploy_crypto%20miner_credential_harvester.pdf",
+    "markdown": "",
+    "sigma_rule": {
+      "title": "Computer Discovery And Export Via Get-ADComputer Cmdlet",
+      "id": "435e10e4-992a-4281-96f3-38b11106adde",
+      "related": [
+        {
+          "id": "db885529-903f-4c5d-9864-28fe199e6370",
+          "type": "similar"
+        }
+      ],
+      "status": "test",
+      "description": "Detects usage of the Get-ADComputer cmdlet to collect computer information and output it to a file",
+      "references": [
+        "https://blog.talosintelligence.com/lazarus-three-rats/",
+        "https://www.microsoft.com/en-us/security/blog/2022/10/18/defenders-beware-a-case-for-post-ransomware-investigations/",
+        "https://www.cisa.gov/uscert/sites/default/files/publications/aa22-320a_joint_csa_iranian_government-sponsored_apt_actors_compromise_federal%20network_deploy_crypto%20miner_credential_harvester.pdf"
+      ],
+      "author": "Nasreddine Bencherchali (Nextron Systems)",
+      "date": "2022-11-10",
+      "modified": "2022-11-17",
+      "tags": [
+        "attack.discovery",
+        "attack.t1033"
+      ],
+      "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+      },
+      "detection": {
+        "selection_img": [
+          {
+            "Image|endswith": [
+              "\\powershell.exe",
+              "\\pwsh.exe"
+            ]
+          },
+          {
+            "OriginalFileName": [
+              "PowerShell.EXE",
+              "pwsh.dll"
+            ]
+          }
+        ],
+        "selection_cli": {
+          "CommandLine|contains|all": [
+            "Get-ADComputer ",
+            " -Filter \\*"
+          ],
+          "CommandLine|contains": [
+            " > ",
+            " | Select ",
+            "Out-File",
+            "Set-Content",
+            "Add-Content"
+          ]
+        },
+        "condition": "all of selection_*"
+      },
+      "falsepositives": [
+        "Legitimate admin scripts may use the same technique, it's better to exclude specific computers or users who execute these commands or scripts often"
+      ],
+      "level": "medium"
+    },
+    "sigma_rule_category": "..\\data\\SigmaHQ\\rules\\windows\\process_creation\\proc_creation_win_powershell_computer_discovery_get_adcomputer.yml"
+  }
+}
